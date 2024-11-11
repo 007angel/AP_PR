@@ -1,6 +1,7 @@
-const {model, DataTypes, Sequelize, Model} = require('sequelize')
-const sequelize = require('../../libs/sequelize')
+const {DataTypes, Sequelize, Model} = require('sequelize')
+//const sequelize = require('../../libs/sequelize')
 
+//dd
 
 const USER_TR_TABLE='user_tr'
 

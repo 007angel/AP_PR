@@ -1,5 +1,5 @@
 const express = require('express');
-const userService = require('../serices/user.service');
+const userService = require('../services/user.service');
 const validatorHandleer = require('../middlewares/validator.handler');
 const { getUserSchema, createUserSchema } = require('../schemas/user.schema');
 
@@ -17,7 +17,7 @@ router.get('/',(req,res)=>{
   }])
 })
 
-
+ 
 router.get('/:id',validatorHandleer(getUserSchema,'params'),
 async(req, res, next)=>{
   try{
@@ -40,6 +40,6 @@ async(req, res, next)=>{
     next(error)
   }
 }
-)
+) 
 
 module.exports=router;

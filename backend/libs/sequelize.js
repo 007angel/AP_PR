@@ -1,32 +1,37 @@
-const {Sequelize}=require('sequelize')
-//const { Pool } = require('pg')
-const { config } = require('./../config/config')
-//const { config } = require('./../config/config2')
-const setupModels = require('./../db/models')
+require('dotenv').config();
+const { Sequelize } = require('sequelize');
+const { config } = require('./../config/config');
+const setupModels = require('./../db/models');
 
-const USER = encodeURIComponent(config.dbUser);
-const PASSWORD = encodeURIComponent(config.dbPassword);
-const URI = `postgres://${'postgres'}:${'123456'}@${config.dbHost}:${config.dbPort}/${config.dbName}`;
+// Configuración de Sequelize para conectar a PostgreSQL
 
-//const pool= new Pool({connectionString:uri})
-const sequelize = new Sequelize(URI,{
-  dialect:'postgres',
-  logging:true
-})
+console.log('configuracion ',config);
+const sequelize = new Sequelize(config.dbName, config.db_user, config.dbPassword, {
+    host: config.DB_HOST,
+    dialect: 'postgres',
+    logging: false,
+});
 
-//funcion para llamara la tabla creada en el index / user.model
+// Inicializar los modelos
+setupModels(sequelize);
 
-setupModels(sequelize)
+console.log(config.DB_NAME);
+// Verificar la conexión
+sequelize.authenticate()
+   .then(() => {
+        console.log('Conexión a la base de datos establecida correctamente');
+    })
+   .catch((error) => {
+        console.error('Error al conectar a la base de datos:', error);
+    });
 
-//inicializar la sincronizacion con la creacion de la base de datos
-sequelize.sync();
+// Sincronizar la base de datos (crear tablas si no existen)
+sequelize.sync({ force: false }) // `force: false` evita borrar las tablas existentes
+    .then(() => {
+        console.log('Base de datos y tablas sincronizadas correctamente');
+    })
+    .catch((error) => {
+        console.error('Error al sincronizar la base de datos:', error);
+    });
 
-module.exports=sequelize;
-
-/* const pool= new Pool({
-    host: 'localhost',
-    port: '5432',
-    user: 'postgres',
-    password:'Datos$01',
-    database:'postgres'
-}) */
+module.exports = sequelize;
