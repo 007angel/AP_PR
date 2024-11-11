@@ -1,20 +1,15 @@
-'use strict';
-
 const express = require('express');
+const morgan =require('morgan')
+const isOden=require('is-odd');
 const app = express();
-const port = 3000;
-
-app.use (express.json());
-
-const authRouter = require('./routes/auth');
-const indexRouter = require('./routes/usuario');
-
-app.use('/api/auth', authRouter);
-app.use('/api/usuarios', indexRouter);
+app.use(express.json())
+app.use(morgan('dev'))
+const routerApi = require('./routes');
+const { json } = require('express');
 
 
 
-app.listen(port, () => {
-    console.log(`Servidor escuchando en http://localhost:${port}`);
-});
 
+routerApi(app)
+app.listen(3000)
+console.log(`server activo ${3000}`)

@@ -1,8 +1,17 @@
-const express = require('express');
-const router = express.Router();
+const express = require ('express')
+const productsRouter = require('./productosRouter')
+const userTr = require('./user.router')
 
-const usuario = require('./usuario');
 
-router.use('/usuario', usuario);
 
-module.exports = router;
+function routerApi(app){
+  const router = express.Router();
+  app.use('/api/v1', router)
+
+  router.use('/productos',productsRouter )
+  router.use('/user',userTr )
+
+}
+
+
+module.exports=routerApi;
