@@ -1,0 +1,207 @@
+<div class="company-form-container">
+  <div class="page-header">
+    <div class="header-content">
+      <h1>{{ isEditMode ? 'Editar Empresa' : 'Registrar Empresa' }}</h1>
+      <p>{{ isEditMode ? 'Actualiza los datos de la empresa' : 'Registra una nueva empresa en el sistema' }}</p>
+    </div>
+    <a routerLink="/companies" class="btn-back">← Volver</a>
+  </div>
+
+  <div *ngIf="isLoading" class="loading">Cargando datos...</div>
+
+  <div *ngIf="successMessage" class="success-message">
+    <span>✓</span> {{ successMessage }}
+  </div>
+
+  <div *ngIf="errorMessage" class="error-message">
+    {{ errorMessage }}
+  </div>
+
+  <form *ngIf="!isLoading" (ngSubmit)="onSubmit()" class="company-form">
+    <div class="form-legend">
+      <span class="legend-required">* Obligatorio</span>
+      <span class="legend-optional">Opcional</span>
+    </div>
+
+    <div class="form-section">
+      <h3>Datos Generales</h3>
+      
+      <div class="form-row">
+        <div class="form-group">
+          <label>Nombre de la Empresa *</label>
+          <input 
+            type="text" 
+            class="form-input"
+            placeholder="Ej: TechSolutions C.A."
+            [(ngModel)]="company.name"
+            name="name"
+            required
+          />
+        </div>
+
+        <div class="form-group">
+          <label>RIF *</label>
+          <input 
+            type="text" 
+            class="form-input"
+            placeholder="Ej: J-12345678-9"
+            [(ngModel)]="company.rif"
+            name="rif"
+            required
+          />
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Correo Electrónico *</label>
+          <input 
+            type="email" 
+            class="form-input"
+            placeholder="Ej: empresa@ejemplo.com"
+            [(ngModel)]="company.email"
+            name="email"
+            required
+          />
+        </div>
+
+        <div class="form-group">
+          <label>Teléfono <span class="optional-tag">(Opcional)</span></label>
+          <input 
+            type="tel" 
+            class="form-input"
+            placeholder="Ej: +58 212-1234567"
+            [(ngModel)]="company.phone"
+            name="phone"
+          />
+        </div>
+      </div>
+    </div>
+
+    <div class="form-section">
+      <h3>Ubicación</h3>
+      
+      <div class="form-group">
+        <label>Dirección <span class="optional-tag">(Opcional)</span></label>
+        <input 
+          type="text" 
+          class="form-input"
+          placeholder="Ej: Av. Principal, Edificio 123, Piso 4"
+          [(ngModel)]="company.address"
+          name="address"
+        />
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Ciudad <span class="optional-tag">(Opcional)</span></label>
+          <input 
+            type="text" 
+            class="form-input"
+            placeholder="Ej: Caracas"
+            [(ngModel)]="company.city"
+            name="city"
+          />
+        </div>
+
+        <div class="form-group">
+          <label>Estado/Provincia <span class="optional-tag">(Opcional)</span></label>
+          <input 
+            type="text" 
+            class="form-input"
+            placeholder="Ej: Distrito Capital"
+            [(ngModel)]="company.state"
+            name="state"
+          />
+        </div>
+
+        <div class="form-group">
+          <label>País <span class="optional-tag">(Opcional)</span></label>
+          <input 
+            type="text" 
+            class="form-input"
+            placeholder="Ej: Venezuela"
+            [(ngModel)]="company.country"
+            name="country"
+          />
+        </div>
+      </div>
+    </div>
+
+    <div class="form-section">
+      <h3>Información Web</h3>
+      
+      <div class="form-row">
+        <div class="form-group">
+          <label>Sitio Web <span class="optional-tag">(Opcional)</span></label>
+          <input 
+            type="url" 
+            class="form-input"
+            placeholder="Ej: https://www.empresa.com"
+            [(ngModel)]="company.website"
+            name="website"
+          />
+        </div>
+
+        <div class="form-group">
+          <label>Logo URL <span class="optional-tag">(Opcional)</span></label>
+          <input 
+            type="url" 
+            class="form-input"
+            placeholder="Ej: https://ejemplo.com/logo.png"
+            [(ngModel)]="company.logo"
+            name="logo"
+          />
+        </div>
+      </div>
+    </div>
+
+    <div class="form-section">
+      <h3>Plan y Configuración</h3>
+      
+      <div class="plans-grid">
+        <div 
+          *ngFor="let plan of plans" 
+          class="plan-card"
+          [class.selected]="company.plan === plan.id"
+          (click)="selectPlan(plan.id)"
+        >
+          <span class="plan-name">{{ plan.name }}</span>
+          <span class="plan-users">{{ plan.users }} usuarios</span>
+          <span class="plan-price">{{ plan.price }}</span>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Estado <span class="optional-tag">(Opcional)</span></label>
+          <select class="form-select" [(ngModel)]="company.status" name="status">
+            <option value="active">Activo</option>
+            <option value="inactive">Inactivo</option>
+            <option value="suspended">Suspendido</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Máximo de Usuarios <span class="optional-tag">(Opcional)</span></label>
+          <input 
+            type="number" 
+            class="form-input"
+            [(ngModel)]="company.maxUsers"
+            name="maxUsers"
+            min="1"
+            max="1000"
+          />
+        </div>
+      </div>
+    </div>
+
+    <div class="form-actions">
+      <a routerLink="/companies" class="btn-cancel">Cancelar</a>
+      <button type="submit" class="btn-submit" [disabled]="isSubmitting">
+        <span *ngIf="!isSubmitting">{{ isEditMode ? 'Actualizar Empresa' : 'Crear Empresa' }}</span>
+        <span *ngIf="isSubmitting">Guardando...</span>
+      </button>
+    </div>
+  </form>
+</div>

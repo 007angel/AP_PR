@@ -13,6 +13,10 @@
     <span>✓</span> {{ successMessage }}
   </div>
 
+  <div class="error-message" *ngIf="errorMessage && !showModal">
+    {{ errorMessage }}
+  </div>
+
   <div class="stats-bar">
     <div class="stat-item">
       <span class="stat-value">{{ users.length }}</span>
@@ -63,12 +67,22 @@
     </div>
   </div>
 
-  <div *ngIf="isLoading" class="loading">
-    Cargando usuarios...
+  <!-- Bulk actions -->
+  <div class="bulk-actions" *ngIf="getSelectedCount() > 0">
+    <span class="selected-count">{{ getSelectedCount() }} seleccionado(s)</span>
+    <button class="btn-bulk btn-activate" (click)="bulkActivate()">
+      ▶️ Activar
+    </button>
+    <button class="btn-bulk btn-deactivate" (click)="bulkDeactivate()">
+      ⏸️ Desactivar
+    </button>
+    <button class="btn-bulk btn-clear" (click)="clearSelection()">
+      ✕ Limpiar
+    </button>
   </div>
 
-  <div *ngIf="errorMessage && !showModal" class="error-message">
-    {{ errorMessage }}
+  <div *ngIf="isLoading" class="loading">
+    Cargando usuarios...
   </div>
 
   <div *ngIf="!isLoading && filteredUsers.length === 0" class="empty-state">
@@ -82,6 +96,14 @@
     <table class="users-table">
       <thead>
         <tr>
+          <th class="checkbox-col">
+            <input 
+              type="checkbox" 
+              [checked]="selectAll"
+              (change)="toggleSelectAll()"
+              class="custom-checkbox"
+            />
+          </th>
           <th>ID</th>
           <th>Nombre</th>
           <th>Email</th>
@@ -93,7 +115,15 @@
         </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let user of filteredUsers">
+        <tr *ngFor="let user of filteredUsers" [class.selected]="isSelected(user.id!)">
+          <td class="checkbox-col">
+            <input 
+              type="checkbox" 
+              [checked]="isSelected(user.id!)"
+              (change)="toggleUserSelection(user.id!)"
+              class="custom-checkbox"
+            />
+          </td>
           <td>{{ user.id }}</td>
           <td class="name-cell">{{ user.name }}</td>
           <td>{{ user.email }}</td>
@@ -114,6 +144,9 @@
             <span class="days-badge">{{ calculateDaysSince(user.createdAt || '') }}d</span>
           </td>
           <td class="actions-cell">
+            <button class="btn-icon btn-company" (click)="openCompanyModal(user)" title="Asignar Empresa" *ngIf="authService.isMaster()">
+              🏢
+            </button>
             <button class="btn-icon btn-config" (click)="openEditModal(user)" title="Configurar" *ngIf="authService.isMaster()">
               ⚙️
             </button>
@@ -249,6 +282,61 @@
       <button class="btn-save" (click)="saveChanges()" [disabled]="isSaving">
         <span *ngIf="!isSaving">Guardar Cambios</span>
         <span *ngIf="isSaving">Guardando...</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal de asignar empresa -->
+<div class="modal-overlay" *ngIf="showCompanyModal" (click)="closeCompanyModal()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>Asignar Empresa</h2>
+      <button class="modal-close" (click)="closeCompanyModal()">×</button>
+    </div>
+    
+    <div class="modal-body" *ngIf="selectedUser">
+      <div class="user-preview">
+        <div class="user-avatar">{{ selectedUser.name.charAt(0) }}</div>
+        <div class="user-info">
+          <span class="user-name">{{ selectedUser.name }}</span>
+          <span class="user-email">{{ selectedUser.email }}</span>
+        </div>
+      </div>
+
+      <div class="error-message" *ngIf="errorMessage">
+        {{ errorMessage }}
+      </div>
+
+      <div class="form-group">
+        <label>Empresa actual</label>
+        <div class="current-company" *ngIf="selectedUser.companyId">
+          <span class="company-name">{{ getCompanyName(selectedUser.companyId) }}</span>
+          <button class="btn-unlink" (click)="unlinkCompany()" [disabled]="isAssigningCompany">
+            Desvincular
+          </button>
+        </div>
+        <div class="no-company" *ngIf="!selectedUser.companyId">
+          <span>Sin empresa asignada</span>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Asignar a empresa</label>
+        <select class="form-select" [(ngModel)]="selectedCompanyId">
+          <option [ngValue]="null">Seleccionar empresa...</option>
+          <option *ngFor="let company of companies" [ngValue]="company.id">
+            {{ company.name }} ({{ company.rif }})
+          </option>
+        </select>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn-cancel" (click)="closeCompanyModal()">Cancelar</button>
+      <button class="btn-save" (click)="assignCompany()" [disabled]="isAssigningCompany || selectedCompanyId === null">
+        <span *ngIf="!isAssigningCompany">Asignar Empresa</span>
+        <span *ngIf="isAssigningCompany">Asignando...</span>
       </button>
     </div>
   </div>

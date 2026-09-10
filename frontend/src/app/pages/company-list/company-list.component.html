@@ -1,0 +1,154 @@
+<div class="company-list-container">
+  <div class="page-header">
+    <div class="header-content">
+      <h1>Gestión de Empresas</h1>
+      <p>Administra las empresas del sistema</p>
+    </div>
+    <button class="btn-primary" routerLink="/companies/new">
+      + Nueva Empresa
+    </button>
+  </div>
+
+  <div *ngIf="successMessage" class="success-message">
+    <span>✓</span> {{ successMessage }}
+  </div>
+
+  <div *ngIf="errorMessage && !showModal" class="error-message">
+    {{ errorMessage }}
+  </div>
+
+  <div class="stats-bar">
+    <div class="stat-item">
+      <span class="stat-value">{{ companies.length }}</span>
+      <span class="stat-label">Total Empresas</span>
+    </div>
+    <div class="stat-item">
+      <span class="stat-value">{{ companies.length }}</span>
+      <span class="stat-label">Activas</span>
+    </div>
+  </div>
+
+  <div class="filters-bar">
+    <div class="search-box">
+      <span class="search-icon">🔍</span>
+      <input 
+        type="text" 
+        placeholder="Buscar por nombre, RIF o email..." 
+        [(ngModel)]="searchTerm"
+        (input)="filterCompanies()"
+      />
+    </div>
+  </div>
+
+  <div *ngIf="isLoading" class="loading">Cargando empresas...</div>
+
+  <div *ngIf="!isLoading && filteredCompanies.length === 0" class="empty-state">
+    <div class="empty-icon">🏢</div>
+    <h3>No hay empresas registradas</h3>
+    <p>Registra la primera empresa para comenzar</p>
+    <button class="btn-primary" routerLink="/companies/new">Registrar Empresa</button>
+  </div>
+
+  <div *ngIf="!isLoading && filteredCompanies.length > 0" class="companies-grid">
+    <div *ngFor="let company of filteredCompanies" class="company-card">
+      <div class="company-header">
+        <div class="company-avatar">{{ company.name.charAt(0) }}</div>
+        <div class="company-info">
+          <h3>{{ company.name }}</h3>
+          <span class="company-rif">{{ company.rif }}</span>
+        </div>
+        <span class="status-badge" [class]="getStatusClass(company.status)">
+          {{ getStatusLabel(company.status) }}
+        </span>
+      </div>
+
+      <div class="company-details">
+        <div class="detail-item">
+          <span class="detail-icon">📧</span>
+          <span>{{ company.email }}</span>
+        </div>
+        <div class="detail-item" *ngIf="company.phone">
+          <span class="detail-icon">📞</span>
+          <span>{{ company.phone }}</span>
+        </div>
+        <div class="detail-item" *ngIf="company.city || company.state">
+          <span class="detail-icon">📍</span>
+          <span>{{ company.city }}{{ company.city && company.state ? ', ' : '' }}{{ company.state }}</span>
+        </div>
+      </div>
+
+      <div class="company-plan">
+        <span class="plan-badge" [class]="getPlanClass(company.plan)">
+          {{ getPlanLabel(company.plan) }}
+        </span>
+        <span class="users-count">{{ company.maxUsers }} usuarios máx.</span>
+      </div>
+
+      <div class="company-actions">
+        <button class="btn-action btn-link" (click)="openLinkModal(company)" title="Vincular Usuarios">
+          👥 Vincular
+        </button>
+        <button class="btn-action btn-edit" [routerLink]="['/companies/edit', company.id]" title="Editar">
+          ✏️ Editar
+        </button>
+        <button class="btn-action btn-delete" (click)="deleteCompany(company.id!)" title="Eliminar">
+          🗑️ Eliminar
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal de vinculación -->
+<div class="modal-overlay" *ngIf="showModal" (click)="closeLinkModal()">
+  <div class="modal-content modal-large" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>Vincular Usuarios - {{ selectedCompany?.name }}</h2>
+      <button class="modal-close" (click)="closeLinkModal()">×</button>
+    </div>
+    
+    <div class="modal-body">
+      <div *ngIf="isLoadingUsers" class="loading">Cargando usuarios...</div>
+
+      <div class="section" *ngIf="!isLoadingUsers">
+        <h3>Usuarios Vinculados ({{ companyUsers.length }})</h3>
+        <div *ngIf="companyUsers.length === 0" class="empty-section">
+          <p>No hay usuarios vinculados a esta empresa</p>
+        </div>
+        <div *ngIf="companyUsers.length > 0" class="users-list">
+          <div *ngFor="let user of companyUsers" class="user-item linked">
+            <div class="user-info">
+              <span class="user-name">{{ user.name }}</span>
+              <span class="user-email">{{ user.email }}</span>
+            </div>
+            <button class="btn-unlink" (click)="unlinkUser(user.id!)">
+              ✕ Desvincular
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="section" *ngIf="!isLoadingUsers">
+        <h3>Usuarios Disponibles ({{ availableUsers.length }})</h3>
+        <div *ngIf="availableUsers.length === 0" class="empty-section">
+          <p>No hay usuarios disponibles para vincular</p>
+        </div>
+        <div *ngIf="availableUsers.length > 0" class="users-list">
+          <div *ngFor="let user of availableUsers" class="user-item available">
+            <div class="user-info">
+              <span class="user-name">{{ user.name }}</span>
+              <span class="user-email">{{ user.email }}</span>
+            </div>
+            <button class="btn-link" (click)="linkUser(user.id!)">
+              + Vincular
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn-close" (click)="closeLinkModal()">Cerrar</button>
+    </div>
+  </div>
+</div>

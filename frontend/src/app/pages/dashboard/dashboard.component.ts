@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { RouterLink, Router } from '@angular/router';
 import { UserService } from '../../services/user.service';
 import { AuthService } from '../../services/auth.service';
@@ -8,9 +9,9 @@ import { User } from '../../models/user.model';
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, RouterLink, FormsModule],
   templateUrl: './dashboard.component.html',
-  styleUrl: './dashboard.component.scss'
+  styleUrls: ['./dashboard.component.scss']
 })
 export class DashboardComponent implements OnInit {
   users: User[] = [];
@@ -23,6 +24,29 @@ export class DashboardComponent implements OnInit {
   isLoading = true;
   currentUser: User | null = null;
   userModules: string[] = [];
+
+  // Modal properties for editing
+  showUserModal = false;
+  showUsersListModal = false;
+  selectedUser: User | null = null;
+  editStatus = '';
+  editModules: string[] = [];
+  isSaving = false;
+  modalError = '';
+  modalSuccess = '';
+
+  // Modal properties for creation
+  showCreateModal = false;
+  isCreating = false;
+  createError = '';
+  newUser: User = {
+    name: '',
+    email: '',
+    password: '',
+    role: 'user',
+    modules: [],
+    status: 'active'
+  };
 
   availableModules = [
     { id: 'users', name: 'Gestión de Usuarios', icon: '👥', description: 'Administrar cuentas y permisos' },
@@ -66,6 +90,144 @@ export class DashboardComponent implements OnInit {
     } else {
       this.isLoading = false;
     }
+  }
+
+  openUserModal(user: User) {
+    this.selectedUser = user;
+    this.editStatus = user.status;
+    this.editModules = user.modules ? [...user.modules] : [];
+    this.showUserModal = true;
+    this.modalError = '';
+    this.modalSuccess = '';
+  }
+
+  closeUserModal() {
+    this.showUserModal = false;
+    this.selectedUser = null;
+    this.editStatus = '';
+    this.editModules = [];
+    this.modalError = '';
+    this.modalSuccess = '';
+  }
+
+  openUsersListModal() {
+    this.showUsersListModal = true;
+  }
+
+  closeUsersListModal() {
+    this.showUsersListModal = false;
+  }
+
+  toggleModule(moduleId: string) {
+    const index = this.editModules.indexOf(moduleId);
+    if (index === -1) {
+      this.editModules.push(moduleId);
+    } else {
+      this.editModules.splice(index, 1);
+    }
+  }
+
+  isModuleSelected(moduleId: string): boolean {
+    return this.editModules.includes(moduleId);
+  }
+
+  saveUserChanges() {
+    if (!this.selectedUser) return;
+    this.isSaving = true;
+    this.modalError = '';
+
+    const changes: Partial<User> = {
+      status: this.editStatus as any,
+      modules: this.editModules
+    };
+
+    this.userService.update(this.selectedUser.id!, changes).subscribe({
+      next: (updated) => {
+        const index = this.users.findIndex(u => u.id === updated.id);
+        if (index !== -1) {
+          this.users[index] = updated;
+        }
+        this.recentUsers = this.users.slice(-5).reverse();
+        this.modalSuccess = 'Usuario actualizado correctamente';
+        this.isSaving = false;
+        setTimeout(() => {
+          this.closeUserModal();
+        }, 1500);
+      },
+      error: (err) => {
+        this.modalError = err.error?.message || 'Error al actualizar usuario';
+        this.isSaving = false;
+      }
+    });
+  }
+
+  // Create user modal methods
+  openCreateModal() {
+    this.resetNewUser();
+    this.showCreateModal = true;
+    this.createError = '';
+  }
+
+  closeCreateModal() {
+    this.showCreateModal = false;
+    this.resetNewUser();
+    this.createError = '';
+  }
+
+  resetNewUser() {
+    this.newUser = {
+      name: '',
+      email: '',
+      password: '',
+      role: 'user',
+      modules: [],
+      status: 'active'
+    };
+  }
+
+  toggleCreateModule(moduleId: string) {
+    if (!this.newUser.modules) {
+      this.newUser.modules = [];
+    }
+    const index = this.newUser.modules.indexOf(moduleId);
+    if (index === -1) {
+      this.newUser.modules.push(moduleId);
+    } else {
+      this.newUser.modules.splice(index, 1);
+    }
+  }
+
+  isCreateModuleSelected(moduleId: string): boolean {
+    return this.newUser.modules?.includes(moduleId) || false;
+  }
+
+  createUser() {
+    if (!this.newUser.name || !this.newUser.email || !this.newUser.password) {
+      this.createError = 'Nombre, email y contraseña son requeridos';
+      return;
+    }
+
+    this.isCreating = true;
+    this.createError = '';
+
+    this.userService.create(this.newUser).subscribe({
+      next: (created) => {
+        this.users.unshift(created);
+        this.totalUsers = this.users.length;
+        this.activeUsers = this.users.filter(u => u.status === 'active').length;
+        this.recentUsers = this.users.slice(-5).reverse();
+        this.modalSuccess = 'Usuario creado correctamente';
+        this.isCreating = false;
+        setTimeout(() => {
+          this.closeCreateModal();
+          this.modalSuccess = '';
+        }, 1500);
+      },
+      error: (err) => {
+        this.createError = err.error?.message || 'Error al crear usuario';
+        this.isCreating = false;
+      }
+    });
   }
 
   isMaster(): boolean {

@@ -3,15 +3,17 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { UserService } from '../../services/user.service';
+import { CompanyService } from '../../services/company.service';
 import { AuthService } from '../../services/auth.service';
 import { User } from '../../models/user.model';
+import { Company } from '../../models/company.model';
 
 @Component({
   selector: 'app-user-list',
   standalone: true,
   imports: [CommonModule, FormsModule, RouterLink],
   templateUrl: './user-list.component.html',
-  styleUrl: './user-list.component.scss'
+  styleUrls: ['./user-list.component.scss']
 })
 export class UserListComponent implements OnInit {
   users: User[] = [];
@@ -23,6 +25,11 @@ export class UserListComponent implements OnInit {
   filterRole = 'all';
   filterStatus = 'all';
 
+  // Selection
+  selectedUsers: Set<number> = new Set();
+  selectAll = false;
+
+  // Modal
   showModal = false;
   selectedUser: User | null = null;
   editRole = '';
@@ -39,8 +46,15 @@ export class UserListComponent implements OnInit {
     { id: 'support', name: 'Soporte', icon: '🛠️' }
   ];
 
+  // Company assignment modal
+  showCompanyModal = false;
+  companies: Company[] = [];
+  selectedCompanyId: number | null = null;
+  isAssigningCompany = false;
+
   constructor(
     private userService: UserService,
+    private companyService: CompanyService,
     public authService: AuthService
   ) {}
 
@@ -55,6 +69,7 @@ export class UserListComponent implements OnInit {
         this.users = data;
         this.filteredUsers = data;
         this.isLoading = false;
+        this.updateSelectAll();
       },
       error: (err) => {
         this.errorMessage = 'Error al cargar usuarios';
@@ -71,6 +86,118 @@ export class UserListComponent implements OnInit {
       const matchesStatus = this.filterStatus === 'all' || user.status === this.filterStatus;
       return matchesSearch && matchesRole && matchesStatus;
     });
+    this.updateSelectAll();
+  }
+
+  // Selection methods
+  toggleSelectAll() {
+    if (this.selectAll) {
+      this.filteredUsers.forEach(user => {
+        if (user.id) this.selectedUsers.add(user.id);
+      });
+    } else {
+      this.selectedUsers.clear();
+    }
+  }
+
+  toggleUserSelection(userId: number) {
+    if (this.selectedUsers.has(userId)) {
+      this.selectedUsers.delete(userId);
+    } else {
+      this.selectedUsers.add(userId);
+    }
+    this.updateSelectAll();
+  }
+
+  updateSelectAll() {
+    this.selectAll = this.filteredUsers.length > 0 && 
+                     this.filteredUsers.every(user => user.id && this.selectedUsers.has(user.id));
+  }
+
+  isSelected(userId: number): boolean {
+    return this.selectedUsers.has(userId);
+  }
+
+  getSelectedCount(): number {
+    return this.selectedUsers.size;
+  }
+
+  clearSelection() {
+    this.selectedUsers.clear();
+    this.selectAll = false;
+  }
+
+  // Bulk actions
+  bulkActivate() {
+    const count = this.selectedUsers.size;
+    if (count === 0) return;
+
+    if (confirm(`¿Estás seguro de activar ${count} usuario(s)?`)) {
+      const ids = Array.from(this.selectedUsers);
+      let completed = 0;
+
+      ids.forEach(id => {
+        this.userService.update(id, { status: 'active' as any }).subscribe({
+          next: (updated) => {
+            const index = this.users.findIndex(u => u.id === updated.id);
+            if (index !== -1) {
+              this.users[index] = updated;
+            }
+            completed++;
+            if (completed === ids.length) {
+              this.filterUsers();
+              this.successMessage = `${count} usuario(s) activado(s) correctamente`;
+              this.clearSelection();
+              setTimeout(() => this.successMessage = '', 3000);
+            }
+          },
+          error: () => {
+            completed++;
+            if (completed === ids.length) {
+              this.filterUsers();
+              this.errorMessage = 'Error al activar algunos usuarios';
+              setTimeout(() => this.errorMessage = '', 3000);
+            }
+          }
+        });
+      });
+    }
+  }
+
+  bulkDeactivate() {
+    const count = this.selectedUsers.size;
+    if (count === 0) return;
+
+    if (confirm(`¿Estás seguro de desactivar ${count} usuario(s)?`)) {
+      const ids = Array.from(this.selectedUsers);
+      let completed = 0;
+
+      ids.forEach(id => {
+        this.userService.update(id, { status: 'inactive' as any }).subscribe({
+          next: (updated) => {
+            const index = this.users.findIndex(u => u.id === updated.id);
+            if (index !== -1) {
+              this.users[index] = updated;
+            }
+            completed++;
+            if (completed === ids.length) {
+              this.filterUsers();
+              this.successMessage = `${count} usuario(s) desactivado(s) correctamente`;
+              this.clearSelection();
+              setTimeout(() => this.successMessage = '', 3000);
+            }
+          },
+          error: () => {
+            completed++;
+            if (completed === ids.length) {
+              this.filterUsers();
+              this.errorMessage = 'Error al desactivar algunos usuarios';
+              setTimeout(() => this.errorMessage = '', 3000);
+            }
+          }
+        });
+      });
+    }
   }
 
   calculateDaysSince(date: string): number {
@@ -120,6 +247,11 @@ export class UserListComponent implements OnInit {
     }).join(', ');
   }
 
+  getCompanyName(companyId: number): string {
+    const company = this.companies.find(c => c.id === companyId);
+    return company ? company.name : 'Empresa desconocida';
+  }
+
   openEditModal(user: User) {
     this.selectedUser = user;
     this.editRole = user.role;
@@ -136,6 +268,82 @@ export class UserListComponent implements OnInit {
     this.editRole = '';
     this.editStatus = '';
     this.editModules = [];
+  }
+
+  openCompanyModal(user: User) {
+    this.selectedUser = user;
+    this.selectedCompanyId = user.companyId || null;
+    this.showCompanyModal = true;
+    this.errorMessage = '';
+    this.loadCompanies();
+  }
+
+  closeCompanyModal() {
+    this.showCompanyModal = false;
+    this.selectedUser = null;
+    this.selectedCompanyId = null;
+  }
+
+  loadCompanies() {
+    this.companyService.findAll().subscribe({
+      next: (data) => {
+        this.companies = data;
+      },
+      error: () => {
+        this.errorMessage = 'Error al cargar empresas';
+      }
+    });
+  }
+
+  assignCompany() {
+    if (!this.selectedUser || this.selectedCompanyId === null) return;
+    this.isAssigningCompany = true;
+
+    this.companyService.linkUser(this.selectedCompanyId, this.selectedUser.id!).subscribe({
+      next: () => {
+        const index = this.users.findIndex(u => u.id === this.selectedUser!.id);
+        if (index !== -1) {
+          this.users[index].companyId = this.selectedCompanyId!;
+        }
+        this.filterUsers();
+        this.successMessage = `Empresa asignada correctamente a ${this.selectedUser!.name}`;
+        this.isAssigningCompany = false;
+        setTimeout(() => {
+          this.closeCompanyModal();
+          this.successMessage = '';
+        }, 1500);
+      },
+      error: (err) => {
+        this.errorMessage = err.error?.message || 'Error al asignar empresa';
+        this.isAssigningCompany = false;
+      }
+    });
+  }
+
+  unlinkCompany() {
+    if (!this.selectedUser) return;
+    this.isAssigningCompany = true;
+
+    this.companyService.unlinkUser(this.selectedUser.companyId!, this.selectedUser.id!).subscribe({
+      next: () => {
+        const index = this.users.findIndex(u => u.id === this.selectedUser!.id);
+        if (index !== -1) {
+          this.users[index].companyId = undefined;
+        }
+        this.filterUsers();
+        this.successMessage = `Empresa desvinculada de ${this.selectedUser!.name}`;
+        this.selectedCompanyId = null;
+        this.isAssigningCompany = false;
+        setTimeout(() => {
+          this.closeCompanyModal();
+          this.successMessage = '';
+        }, 1500);
+      },
+      error: (err) => {
+        this.errorMessage = err.error?.message || 'Error al desvincular empresa';
+        this.isAssigningCompany = false;
+      }
+    });
   }
 
   toggleModule(moduleId: string) {
@@ -211,6 +419,7 @@ export class UserListComponent implements OnInit {
       this.userService.delete(id).subscribe({
         next: () => {
           this.users = this.users.filter(u => u.id !== id);
+          this.selectedUsers.delete(id);
           this.filterUsers();
           this.successMessage = 'Usuario eliminado correctamente';
           setTimeout(() => this.successMessage = '', 3000);

@@ -1,8 +1,8 @@
 const {DataTypes, Sequelize, Model} = require('sequelize')
 
-const USER_TR_TABLE='user_tr'
+const COMPANY_TR_TABLE='company_tr'
 
-const UserTrSchema={
+const CompanyTrSchema={
   id:{
     allowNull:false,
     autoIncrement:true,
@@ -13,38 +13,60 @@ const UserTrSchema={
     allowNull:false,
     type:DataTypes.STRING
   },
+  rif:{
+    allowNull:false,
+    type:DataTypes.STRING,
+    unique:true
+  },
   email:{
     allowNull:false,
     type:DataTypes.STRING,
     unique:true
   },
-  password:{
-    allowNull:false,
+  phone:{
+    allowNull:true,
     type:DataTypes.STRING
   },
-  role:{
-    allowNull:false,
-    type:DataTypes.STRING,
-    defaultValue:'user'
-  },
-  modules:{
+  address:{
     allowNull:true,
-    type:DataTypes.JSON,
-    defaultValue:[]
+    type:DataTypes.TEXT
+  },
+  city:{
+    allowNull:true,
+    type:DataTypes.STRING
+  },
+  state:{
+    allowNull:true,
+    type:DataTypes.STRING
+  },
+  country:{
+    allowNull:true,
+    type:DataTypes.STRING,
+    defaultValue:'Venezuela'
+  },
+  logo:{
+    allowNull:true,
+    type:DataTypes.STRING
+  },
+  website:{
+    allowNull:true,
+    type:DataTypes.STRING
   },
   status:{
     allowNull:false,
     type:DataTypes.STRING,
     defaultValue:'active'
   },
-  companyId:{
-    allowNull:true,
+  plan:{
+    allowNull:false,
+    type:DataTypes.STRING,
+    defaultValue:'basic'
+  },
+  maxUsers:{
+    allowNull:false,
     type:DataTypes.INTEGER,
-    field:'company_id',
-    references:{
-      model:'company_tr',
-      key:'id'
-    }
+    field:'max_users',
+    defaultValue:5
   },
   createdAt:{
     allowNull:false,
@@ -60,19 +82,19 @@ const UserTrSchema={
   }
 }
 
-class UserTr extends Model{
+class CompanyTr extends Model{
   static associate(models){
-    this.belongsTo(models.CompanyTr, { foreignKey: 'companyId', as: 'company' })
+    this.hasMany(models.UserTr, { foreignKey: 'companyId', as: 'users' })
   }
 
   static config(sequelize){
     return {
       sequelize,
-      tableName:USER_TR_TABLE,
-      modelName:'UserTr',
+      tableName:COMPANY_TR_TABLE,
+      modelName:'CompanyTr',
       timestamps:false
     }
   }
 }
 
-module.exports = {USER_TR_TABLE,UserTrSchema,UserTr}
+module.exports = {COMPANY_TR_TABLE,CompanyTrSchema,CompanyTr}

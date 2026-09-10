@@ -14,9 +14,9 @@
         <span class="nav-icon">👥</span>
         Usuarios
       </a>
-      <a *ngIf="isMaster() || isAdmin()" routerLink="/users/new" class="nav-item">
-        <span class="nav-icon">➕</span>
-        Nuevo Usuario
+      <a *ngIf="isMaster() || isAdmin()" routerLink="/companies" class="nav-item">
+        <span class="nav-icon">🏢</span>
+        Empresas
       </a>
       <ng-container *ngIf="isMaster()">
         <a routerLink="/modules" class="nav-item">
@@ -130,7 +130,7 @@
           <div class="card-body">
             <div *ngIf="recentUsers.length === 0" class="empty-state">
               <p>No hay usuarios registrados</p>
-              <a routerLink="/users/new" class="btn-primary">Crear Primer Usuario</a>
+              <button class="btn-primary" (click)="openCreateModal()">Crear Primer Usuario</button>
             </div>
             <div *ngIf="recentUsers.length > 0" class="user-list">
               <div *ngFor="let user of recentUsers" class="user-item">
@@ -154,20 +154,20 @@
             <h3>Acciones Rápidas</h3>
           </div>
           <div class="card-body">
-            <a *ngIf="isMaster() || isAdmin()" routerLink="/users/new" class="action-btn">
+            <button *ngIf="isMaster() || isAdmin()" class="action-btn" (click)="openCreateModal()">
               <span class="action-icon">➕</span>
               <div class="action-text">
                 <strong>Crear Usuario</strong>
                 <span>Agregar nuevo usuario al sistema</span>
               </div>
-            </a>
-            <a *ngIf="isMaster() || isAdmin()" routerLink="/users" class="action-btn">
+            </button>
+            <button *ngIf="isMaster() || isAdmin()" class="action-btn" (click)="openUsersListModal()">
               <span class="action-icon">👥</span>
               <div class="action-text">
                 <strong>Gestionar Usuarios</strong>
                 <span>Administrar cuentas y permisos</span>
               </div>
-            </a>
+            </button>
             <a *ngIf="isMaster()" routerLink="/modules" class="action-btn">
               <span class="action-icon">📦</span>
               <div class="action-text">
@@ -180,4 +180,210 @@
       </div>
     </div>
   </main>
+</div>
+
+<!-- Modal de gestión de usuario -->
+<div class="modal-overlay" *ngIf="showUserModal" (click)="closeUserModal()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>Gestión de Cuenta</h2>
+      <button class="modal-close" (click)="closeUserModal()">×</button>
+    </div>
+    
+    <div class="modal-body" *ngIf="selectedUser">
+      <div class="user-preview">
+        <div class="user-avatar">{{ selectedUser.name.charAt(0) }}</div>
+        <div class="user-info">
+          <span class="user-name">{{ selectedUser.name }}</span>
+          <span class="user-email">{{ selectedUser.email }}</span>
+        </div>
+      </div>
+
+      <div class="success-message" *ngIf="modalSuccess">
+        <span>✓</span> {{ modalSuccess }}
+      </div>
+
+      <div class="error-message" *ngIf="modalError">
+        {{ modalError }}
+      </div>
+
+      <div class="form-group">
+        <label>Estado de la cuenta</label>
+        <div class="toggle-switch">
+          <input 
+            type="checkbox" 
+            id="statusToggle" 
+            [checked]="editStatus === 'active'"
+            (change)="editStatus = editStatus === 'active' ? 'inactive' : 'active'"
+          />
+          <label for="statusToggle" class="toggle-label">
+            <span class="toggle-text">{{ editStatus === 'active' ? 'Habilitado' : 'Deshabilitado' }}</span>
+          </label>
+        </div>
+        <span class="status-indicator" [class.active]="editStatus === 'active'">
+          {{ editStatus === 'active' ? '✅ Cuenta activa' : '⏸️ Cuenta inactiva' }}
+        </span>
+      </div>
+
+      <div class="form-group">
+        <label>Módulos asignados</label>
+        <div class="modules-grid">
+          <div 
+            *ngFor="let module of availableModules" 
+            class="module-checkbox"
+            [class.selected]="isModuleSelected(module.id)"
+            (click)="toggleModule(module.id)"
+          >
+            <span class="module-icon">{{ module.icon }}</span>
+            <div class="module-info">
+              <span class="module-name">{{ module.name }}</span>
+              <span class="module-desc">{{ module.description }}</span>
+            </div>
+            <span class="check-icon">{{ isModuleSelected(module.id) ? '✓' : '' }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn-cancel" (click)="closeUserModal()">Cancelar</button>
+      <button class="btn-save" (click)="saveUserChanges()" [disabled]="isSaving">
+        <span *ngIf="!isSaving">Guardar Cambios</span>
+        <span *ngIf="isSaving">Guardando...</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal de creación de usuario -->
+<div class="modal-overlay" *ngIf="showCreateModal" (click)="closeCreateModal()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>Crear Nuevo Usuario</h2>
+      <button class="modal-close" (click)="closeCreateModal()">×</button>
+    </div>
+    
+    <div class="modal-body">
+      <div class="success-message" *ngIf="modalSuccess">
+        <span>✓</span> {{ modalSuccess }}
+      </div>
+
+      <div class="error-message" *ngIf="createError">
+        {{ createError }}
+      </div>
+
+      <div class="form-group">
+        <label>Nombre completo *</label>
+        <input 
+          type="text" 
+          class="form-input"
+          placeholder="Ej: Juan Pérez"
+          [(ngModel)]="newUser.name"
+        />
+      </div>
+
+      <div class="form-group">
+        <label>Correo electrónico *</label>
+        <input 
+          type="email" 
+          class="form-input"
+          placeholder="Ej: usuario@ejemplo.com"
+          [(ngModel)]="newUser.email"
+        />
+      </div>
+
+      <div class="form-group">
+        <label>Contraseña *</label>
+        <input 
+          type="password" 
+          class="form-input"
+          placeholder="Mínimo 8 caracteres"
+          [(ngModel)]="newUser.password"
+        />
+      </div>
+
+      <div class="form-group">
+        <label>Rol del usuario</label>
+        <div class="role-options">
+          <button 
+            class="role-option" 
+            [class.selected]="newUser.role === 'user'"
+            (click)="newUser.role = 'user'"
+            type="button"
+          >
+            <span class="role-icon">👤</span>
+            <span class="role-name">Usuario</span>
+          </button>
+          <button 
+            class="role-option" 
+            [class.selected]="newUser.role === 'admin'"
+            (click)="newUser.role = 'admin'"
+            *ngIf="isMaster()"
+            type="button"
+          >
+            <span class="role-icon">👨‍💼</span>
+            <span class="role-name">Admin</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Módulos a asignar</label>
+        <div class="modules-grid">
+          <div 
+            *ngFor="let module of availableModules" 
+            class="module-checkbox"
+            [class.selected]="isCreateModuleSelected(module.id)"
+            (click)="toggleCreateModule(module.id)"
+          >
+            <span class="module-icon">{{ module.icon }}</span>
+            <div class="module-info">
+              <span class="module-name">{{ module.name }}</span>
+              <span class="module-desc">{{ module.description }}</span>
+            </div>
+            <span class="check-icon">{{ isCreateModuleSelected(module.id) ? '✓' : '' }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn-cancel" (click)="closeCreateModal()">Cancelar</button>
+      <button class="btn-save" (click)="createUser()" [disabled]="isCreating">
+        <span *ngIf="!isCreating">Crear Usuario</span>
+        <span *ngIf="isCreating">Creando...</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal de listado de usuarios -->
+<div class="modal-overlay" *ngIf="showUsersListModal" (click)="closeUsersListModal()">
+  <div class="modal-content modal-large" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>Todos los Usuarios ({{ users.length }})</h2>
+      <button class="modal-close" (click)="closeUsersListModal()">×</button>
+    </div>
+    
+    <div class="modal-body">
+      <div *ngIf="users.length === 0" class="empty-list">
+        <p>No hay usuarios registrados</p>
+      </div>
+      
+      <div *ngIf="users.length > 0" class="users-email-list">
+        <div *ngFor="let user of users" class="user-email-item" (click)="openUserModal(user); closeUsersListModal()">
+          <div class="user-avatar">{{ user.name.charAt(0) }}</div>
+          <div class="user-info">
+            <span class="user-name">{{ user.name }}</span>
+            <span class="user-email">{{ user.email }}</span>
+          </div>
+          <span class="user-role" [class]="'role-' + user.role">{{ user.role }}</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn-cancel" (click)="closeUsersListModal()">Cerrar</button>
+    </div>
+  </div>
 </div>
