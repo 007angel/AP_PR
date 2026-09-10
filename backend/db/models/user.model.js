@@ -1,7 +1,4 @@
 const {DataTypes, Sequelize, Model} = require('sequelize')
-//const sequelize = require('../../libs/sequelize')
-
-//dd
 
 const USER_TR_TABLE='user_tr'
 
@@ -12,6 +9,10 @@ const UserTrSchema={
     primaryKey:true,
     type:DataTypes.INTEGER
   },
+  name:{
+    allowNull:false,
+    type:DataTypes.STRING
+  },
   email:{
     allowNull:false,
     type:DataTypes.STRING,
@@ -21,10 +22,31 @@ const UserTrSchema={
     allowNull:false,
     type:DataTypes.STRING
   },
-  creatAT:{
+  role:{
+    allowNull:false,
+    type:DataTypes.STRING,
+    defaultValue:'user'
+  },
+  modules:{
+    allowNull:true,
+    type:DataTypes.JSON,
+    defaultValue:[]
+  },
+  status:{
+    allowNull:false,
+    type:DataTypes.STRING,
+    defaultValue:'active'
+  },
+  createdAt:{
     allowNull:false,
     type:DataTypes.DATE,
-    field:'create_dt',
+    field:'created_at',
+    defaultValue : Sequelize.NOW
+  },
+  updatedAt:{
+    allowNull:true,
+    type:DataTypes.DATE,
+    field:'updated_at',
     defaultValue : Sequelize.NOW
   }
 }
@@ -38,7 +60,7 @@ class UserTr extends Model{
     return {
       sequelize,
       tableName:USER_TR_TABLE,
-      ModelName:'UserTr',
+      modelName:'UserTr',
       timestamps:false
     }
   }

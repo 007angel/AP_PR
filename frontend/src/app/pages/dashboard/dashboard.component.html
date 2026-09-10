@@ -1,0 +1,183 @@
+<div class="dashboard-layout">
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <span class="logo-icon">⚡</span>
+      <span class="logo-text">TechSolutions</span>
+    </div>
+
+    <nav class="sidebar-nav">
+      <a routerLink="/dashboard" class="nav-item active">
+        <span class="nav-icon">📊</span>
+        Dashboard
+      </a>
+      <a *ngIf="isMaster() || isAdmin()" routerLink="/users" class="nav-item">
+        <span class="nav-icon">👥</span>
+        Usuarios
+      </a>
+      <a *ngIf="isMaster() || isAdmin()" routerLink="/users/new" class="nav-item">
+        <span class="nav-icon">➕</span>
+        Nuevo Usuario
+      </a>
+      <ng-container *ngIf="isMaster()">
+        <a routerLink="/modules" class="nav-item">
+          <span class="nav-icon">📦</span>
+          Módulos
+        </a>
+        <a routerLink="/settings" class="nav-item">
+          <span class="nav-icon">⚙️</span>
+          Configuración
+        </a>
+      </ng-container>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="user-info">
+        <div class="user-avatar">{{ currentUser?.name?.charAt(0) || 'U' }}</div>
+        <div class="user-details">
+          <span class="user-name">{{ currentUser?.name }}</span>
+          <span class="user-role" [class]="getRoleClass()">{{ getRoleLabel() }}</span>
+        </div>
+      </div>
+      <button class="btn-logout" (click)="logout()">
+        <span>🚪</span>
+      </button>
+    </div>
+  </aside>
+
+  <main class="main-content">
+    <header class="top-bar">
+      <div class="top-bar-left">
+        <h1>Dashboard</h1>
+        <p *ngIf="isMaster()">Panel de administración master</p>
+        <p *ngIf="isAdmin()">Panel de administración</p>
+        <p *ngIf="isUser()">Mi panel de trabajo</p>
+      </div>
+      <div class="top-bar-right">
+        <span class="role-badge" [class]="getRoleClass()">{{ getRoleLabel() }}</span>
+      </div>
+    </header>
+
+    <div class="content-area">
+      <div *ngIf="isLoading" class="loading">Cargando datos...</div>
+
+      <!-- Stats para Master y Admin -->
+      <div *ngIf="!isLoading && (isMaster() || isAdmin())" class="stats-grid">
+        <div class="stat-card stat-total">
+          <div class="stat-icon">👥</div>
+          <div class="stat-info">
+            <span class="stat-value">{{ totalUsers }}</span>
+            <span class="stat-label">Total Usuarios</span>
+          </div>
+        </div>
+
+        <div class="stat-card stat-active">
+          <div class="stat-icon">✅</div>
+          <div class="stat-info">
+            <span class="stat-value">{{ activeUsers }}</span>
+            <span class="stat-label">Activos</span>
+          </div>
+        </div>
+
+        <div class="stat-card stat-trial" *ngIf="isMaster()">
+          <div class="stat-icon">🆓</div>
+          <div class="stat-info">
+            <span class="stat-value">{{ trialUsers }}</span>
+            <span class="stat-label">En Prueba</span>
+          </div>
+        </div>
+
+        <div class="stat-card stat-inactive">
+          <div class="stat-icon">⏸️</div>
+          <div class="stat-info">
+            <span class="stat-value">{{ inactiveUsers }}</span>
+            <span class="stat-label">Inactivos</span>
+          </div>
+        </div>
+
+        <div class="stat-card stat-suspended">
+          <div class="stat-icon">🚫</div>
+          <div class="stat-info">
+            <span class="stat-value">{{ suspendedUsers }}</span>
+            <span class="stat-label">Suspendidos</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Módulos asignados para usuarios -->
+      <div *ngIf="!isLoading && isUser()" class="modules-section">
+        <h2>Mis Módulos Asignados</h2>
+        <div class="modules-grid">
+          <div *ngFor="let module of availableModules" 
+               class="module-card" 
+               [class.assigned]="hasModule(module.id)"
+               [class.locked]="!hasModule(module.id)">
+            <span class="module-icon">{{ module.icon }}</span>
+            <h3>{{ module.name }}</h3>
+            <p>{{ module.description }}</p>
+            <span *ngIf="hasModule(module.id)" class="module-status available">Disponible</span>
+            <span *ngIf="!hasModule(module.id)" class="module-status locked">No asignado</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Contenido para Master y Admin -->
+      <div *ngIf="!isLoading && (isMaster() || isAdmin())" class="content-grid">
+        <div class="card recent-users">
+          <div class="card-header">
+            <h3>Usuarios Recientes</h3>
+            <a routerLink="/users" class="view-all">Ver todos →</a>
+          </div>
+          <div class="card-body">
+            <div *ngIf="recentUsers.length === 0" class="empty-state">
+              <p>No hay usuarios registrados</p>
+              <a routerLink="/users/new" class="btn-primary">Crear Primer Usuario</a>
+            </div>
+            <div *ngIf="recentUsers.length > 0" class="user-list">
+              <div *ngFor="let user of recentUsers" class="user-item">
+                <div class="user-info">
+                  <span class="user-name">{{ user.name }}</span>
+                  <span class="user-email">{{ user.email }}</span>
+                </div>
+                <div class="user-meta">
+                  <span class="role-tag" [class]="user.role">{{ user.role }}</span>
+                  <span class="status-badge" [class]="getStatusClass(user.status)">
+                    {{ getStatusLabel(user.status) }}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card quick-actions">
+          <div class="card-header">
+            <h3>Acciones Rápidas</h3>
+          </div>
+          <div class="card-body">
+            <a *ngIf="isMaster() || isAdmin()" routerLink="/users/new" class="action-btn">
+              <span class="action-icon">➕</span>
+              <div class="action-text">
+                <strong>Crear Usuario</strong>
+                <span>Agregar nuevo usuario al sistema</span>
+              </div>
+            </a>
+            <a *ngIf="isMaster() || isAdmin()" routerLink="/users" class="action-btn">
+              <span class="action-icon">👥</span>
+              <div class="action-text">
+                <strong>Gestionar Usuarios</strong>
+                <span>Administrar cuentas y permisos</span>
+              </div>
+            </a>
+            <a *ngIf="isMaster()" routerLink="/modules" class="action-btn">
+              <span class="action-icon">📦</span>
+              <div class="action-text">
+                <strong>Asignar Módulos</strong>
+                <span>Configurar módulos por usuario</span>
+              </div>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>

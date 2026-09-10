@@ -6,8 +6,9 @@ const setupModels = require('./../db/models');
 // Configuración de Sequelize para conectar a PostgreSQL
 
 console.log('configuracion ',config);
-const sequelize = new Sequelize(config.dbName, config.db_user, config.dbPassword, {
-    host: config.DB_HOST,
+const sequelize = new Sequelize(config.dbName, config.dbUser, config.dbPassword, {
+    host: config.dbHost,
+    port: config.dbPort,
     dialect: 'postgres',
     logging: false,
 });
@@ -15,7 +16,7 @@ const sequelize = new Sequelize(config.dbName, config.db_user, config.dbPassword
 // Inicializar los modelos
 setupModels(sequelize);
 
-console.log(config.DB_NAME);
+console.log('DB: ', config.dbName);
 // Verificar la conexión
 sequelize.authenticate()
    .then(() => {

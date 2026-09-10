@@ -1,0 +1,124 @@
+<div class="auth-container">
+  <div class="auth-left">
+    <div class="brand">
+      <div class="logo">
+        <span class="logo-icon">⚡</span>
+        <span class="logo-text">TechSolutions</span>
+      </div>
+    </div>
+
+    <div class="hero-content">
+      <h1>Bienvenido de vuelta</h1>
+      <p class="subtitle">Inicia sesión para acceder a tu panel de control</p>
+
+      <div class="features">
+        <div class="feature-item">
+          <span class="feature-icon">📊</span>
+          <span>Dashboard en tiempo real</span>
+        </div>
+        <div class="feature-item">
+          <span class="feature-icon">🔔</span>
+          <span>Notificaciones inteligentes</span>
+        </div>
+        <div class="feature-item">
+          <span class="feature-icon">📈</span>
+          <span>Reportes automáticos</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="auth-right">
+    <div class="auth-form-container">
+      <div class="auth-header">
+        <h2>Iniciar Sesión</h2>
+        <p>Ingresa tus credenciales para continuar</p>
+      </div>
+
+      <!-- Mensaje de trial expirado -->
+      <div class="expired-alert" *ngIf="showExpiredMessage">
+        <div class="expired-icon">⚠️</div>
+        <h3>Período de prueba finalizado</h3>
+        <p>Tu período de prueba de 14 días ha expirado. Para continuar usando la plataforma, contacta a tu asesor de ventas para activar tu suscripción.</p>
+        <button class="btn-contact" (click)="contactSales()">
+          <span>📞</span> Contactar Asesor de Ventas
+        </button>
+        <a class="expired-link" href="mailto:ventas&#64;techsolutions.com">O envía un correo a ventas&#64;techsolutions.com</a>
+      </div>
+
+      <form class="auth-form" (ngSubmit)="onSubmit()" *ngIf="!showExpiredMessage">
+        <!-- Error message -->
+        <div class="error-toast" *ngIf="errorMessage" [ngClass]="{'error-email': errorType === 'email', 'error-password': errorType === 'password'}">
+          <span class="error-icon">{{ errorType === 'email' ? '📧' : errorType === 'password' ? '🔒' : '⚠️' }}</span>
+          <div class="error-content">
+            <strong>{{ errorType === 'email' ? 'Correo no encontrado' : errorType === 'password' ? 'Contraseña incorrecta' : 'Error' }}</strong>
+            <p>{{ errorMessage }}</p>
+          </div>
+          <button class="error-close" (click)="errorMessage = ''; errorType = ''">×</button>
+        </div>
+
+        <div class="form-group" [ngClass]="{'input-error': errorType === 'email'}">
+          <label for="email">Correo electrónico</label>
+          <input
+            type="email"
+            id="email"
+            name="email"
+            [(ngModel)]="credentials.email"
+            placeholder="ejemplo&#64;correo.com"
+            required
+          />
+          <span class="field-error" *ngIf="errorType === 'email'">Correo electrónico no registrado</span>
+        </div>
+
+        <div class="form-group" [ngClass]="{'input-error': errorType === 'password'}">
+          <label for="password">Contraseña</label>
+          <input
+            type="password"
+            id="password"
+            name="password"
+            [(ngModel)]="credentials.password"
+            placeholder="Ingresa tu contraseña"
+            required
+          />
+          <span class="field-error" *ngIf="errorType === 'password'">La contraseña que ingresaste es incorrecta</span>
+        </div>
+
+        <div class="form-options">
+          <label class="remember-me">
+            <input type="checkbox" name="remember" [(ngModel)]="rememberMe" />
+            <span>Recordarme</span>
+          </label>
+          <a href="#" class="forgot-password">¿Olvidaste tu contraseña?</a>
+        </div>
+
+        <button type="submit" class="btn-submit" [disabled]="isLoading">
+          <span *ngIf="!isLoading">Iniciar Sesión</span>
+          <span *ngIf="isLoading">Cargando...</span>
+        </button>
+      </form>
+
+      <div class="auth-divider" *ngIf="!showExpiredMessage">
+        <span>o continúa con</span>
+      </div>
+
+      <div class="social-buttons" *ngIf="!showExpiredMessage">
+        <button class="btn-social btn-google">
+          <span>G</span>
+          Google
+        </button>
+        <button class="btn-social btn-microsoft">
+          <span>M</span>
+          Microsoft
+        </button>
+      </div>
+
+      <div class="auth-footer" *ngIf="!showExpiredMessage">
+        <p>¿No tienes una cuenta? <a routerLink="/register">Regístrate aquí</a></p>
+      </div>
+
+      <div class="back-link">
+        <a routerLink="/">← Volver al inicio</a>
+      </div>
+    </div>
+  </div>
+</div>

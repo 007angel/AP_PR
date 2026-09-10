@@ -1,0 +1,255 @@
+<div class="user-list-container">
+  <div class="page-header">
+    <div class="header-content">
+      <h1>Gestión de Usuarios</h1>
+      <p>Administra los usuarios del sistema</p>
+    </div>
+    <button class="btn-primary" routerLink="/users/new">
+      + Nuevo Usuario
+    </button>
+  </div>
+
+  <div class="success-message" *ngIf="successMessage">
+    <span>✓</span> {{ successMessage }}
+  </div>
+
+  <div class="stats-bar">
+    <div class="stat-item">
+      <span class="stat-value">{{ users.length }}</span>
+      <span class="stat-label">Total Usuarios</span>
+    </div>
+    <div class="stat-item">
+      <span class="stat-value">{{ getStatusCount('active') }}</span>
+      <span class="stat-label">Activos</span>
+    </div>
+    <div class="stat-item">
+      <span class="stat-value">{{ getStatusCount('inactive') }}</span>
+      <span class="stat-label">Inactivos</span>
+    </div>
+    <div class="stat-item">
+      <span class="stat-value">{{ getStatusCount('suspended') }}</span>
+      <span class="stat-label">Suspendidos</span>
+    </div>
+    <div class="stat-item">
+      <span class="stat-value">{{ getStatusCount('trial') }}</span>
+      <span class="stat-label">En Prueba</span>
+    </div>
+  </div>
+
+  <div class="filters-bar">
+    <div class="search-box">
+      <span class="search-icon">🔍</span>
+      <input 
+        type="text" 
+        placeholder="Buscar por nombre o email..." 
+        [(ngModel)]="searchTerm"
+        (input)="filterUsers()"
+      />
+    </div>
+    <div class="filter-group">
+      <select [(ngModel)]="filterRole" (change)="filterUsers()">
+        <option value="all">Todos los roles</option>
+        <option value="master">Master</option>
+        <option value="admin">Administrador</option>
+        <option value="user">Usuario</option>
+      </select>
+      <select [(ngModel)]="filterStatus" (change)="filterUsers()">
+        <option value="all">Todos los estados</option>
+        <option value="active">Activo</option>
+        <option value="inactive">Inactivo</option>
+        <option value="suspended">Suspendido</option>
+        <option value="trial">Prueba</option>
+      </select>
+    </div>
+  </div>
+
+  <div *ngIf="isLoading" class="loading">
+    Cargando usuarios...
+  </div>
+
+  <div *ngIf="errorMessage && !showModal" class="error-message">
+    {{ errorMessage }}
+  </div>
+
+  <div *ngIf="!isLoading && filteredUsers.length === 0" class="empty-state">
+    <div class="empty-icon">👤</div>
+    <h3>No hay usuarios registrados</h3>
+    <p>Crea el primer usuario para comenzar</p>
+    <button class="btn-primary" routerLink="/users/new">Crear Usuario</button>
+  </div>
+
+  <div *ngIf="!isLoading && filteredUsers.length > 0" class="table-container">
+    <table class="users-table">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Nombre</th>
+          <th>Email</th>
+          <th>Rol</th>
+          <th>Módulos</th>
+          <th>Estado</th>
+          <th>Días</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let user of filteredUsers">
+          <td>{{ user.id }}</td>
+          <td class="name-cell">{{ user.name }}</td>
+          <td>{{ user.email }}</td>
+          <td>
+            <span class="role-badge" [class]="getRoleClass(user.role)">
+              {{ getRoleLabel(user.role) }}
+            </span>
+          </td>
+          <td class="modules-cell">
+            <span class="modules-text">{{ getModuleNames(user.modules) }}</span>
+          </td>
+          <td>
+            <span class="status-badge" [class]="getStatusClass(user.status)">
+              {{ getStatusLabel(user.status) }}
+            </span>
+          </td>
+          <td class="days-cell">
+            <span class="days-badge">{{ calculateDaysSince(user.createdAt || '') }}d</span>
+          </td>
+          <td class="actions-cell">
+            <button class="btn-icon btn-config" (click)="openEditModal(user)" title="Configurar" *ngIf="authService.isMaster()">
+              ⚙️
+            </button>
+            <button 
+              class="btn-icon" 
+              [class]="user.status === 'active' ? 'btn-deactivate' : 'btn-activate'"
+              (click)="toggleUserStatus(user)" 
+              [title]="user.status === 'active' ? 'Desactivar' : 'Activar'"
+              *ngIf="authService.isMaster()"
+            >
+              {{ user.status === 'active' ? '⏸️' : '▶️' }}
+            </button>
+            <button class="btn-icon btn-edit" [routerLink]="['/users/edit', user.id]" title="Editar">
+              ✏️
+            </button>
+            <button class="btn-icon btn-delete" (click)="deleteUser(user.id!)" title="Eliminar">
+              🗑️
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Modal de edición rápida -->
+<div class="modal-overlay" *ngIf="showModal" (click)="closeModal()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>Configurar Usuario</h2>
+      <button class="modal-close" (click)="closeModal()">×</button>
+    </div>
+    
+    <div class="modal-body" *ngIf="selectedUser">
+      <div class="user-preview">
+        <div class="user-avatar">{{ selectedUser.name.charAt(0) }}</div>
+        <div class="user-info">
+          <span class="user-name">{{ selectedUser.name }}</span>
+          <span class="user-email">{{ selectedUser.email }}</span>
+        </div>
+      </div>
+
+      <div class="error-message" *ngIf="errorMessage">
+        {{ errorMessage }}
+      </div>
+
+      <div class="form-group">
+        <label>Rol del usuario</label>
+        <div class="role-options">
+          <button 
+            class="role-option" 
+            [class.selected]="editRole === 'user'"
+            (click)="editRole = 'user'"
+          >
+            <span class="role-icon">👤</span>
+            <span class="role-name">Usuario</span>
+            <span class="role-desc">Usa módulos asignados</span>
+          </button>
+          <button 
+            class="role-option" 
+            [class.selected]="editRole === 'admin'"
+            (click)="editRole = 'admin'"
+          >
+            <span class="role-icon">👨‍💼</span>
+            <span class="role-name">Admin</span>
+            <span class="role-desc">Gestiona usuarios</span>
+          </button>
+          <button 
+            class="role-option" 
+            [class.selected]="editRole === 'master'"
+            (click)="editRole = 'master'"
+          >
+            <span class="role-icon">👑</span>
+            <span class="role-name">Master</span>
+            <span class="role-desc">Control total</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Estado</label>
+        <div class="status-options">
+          <button 
+            class="status-option active" 
+            [class.selected]="editStatus === 'active'"
+            (click)="editStatus = 'active'"
+          >
+            <span>✅</span> Activo
+          </button>
+          <button 
+            class="status-option inactive" 
+            [class.selected]="editStatus === 'inactive'"
+            (click)="editStatus = 'inactive'"
+          >
+            <span>⏸️</span> Inactivo
+          </button>
+          <button 
+            class="status-option suspended" 
+            [class.selected]="editStatus === 'suspended'"
+            (click)="editStatus = 'suspended'"
+          >
+            <span>🚫</span> Suspendido
+          </button>
+          <button 
+            class="status-option trial" 
+            [class.selected]="editStatus === 'trial'"
+            (click)="editStatus = 'trial'"
+          >
+            <span>🆓</span> Prueba
+          </button>
+        </div>
+      </div>
+
+      <div class="form-group" *ngIf="editRole !== 'master'">
+        <label>Módulos asignados</label>
+        <div class="modules-grid">
+          <div 
+            *ngFor="let module of availableModules" 
+            class="module-checkbox"
+            [class.selected]="isModuleSelected(module.id)"
+            (click)="toggleModule(module.id)"
+          >
+            <span class="module-icon">{{ module.icon }}</span>
+            <span class="module-name">{{ module.name }}</span>
+            <span class="check-icon">{{ isModuleSelected(module.id) ? '✓' : '' }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn-cancel" (click)="closeModal()">Cancelar</button>
+      <button class="btn-save" (click)="saveChanges()" [disabled]="isSaving">
+        <span *ngIf="!isSaving">Guardar Cambios</span>
+        <span *ngIf="isSaving">Guardando...</span>
+      </button>
+    </div>
+  </div>
+</div>

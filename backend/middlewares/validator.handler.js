@@ -5,7 +5,7 @@ function validatorHandleer(schemas, property){
     const data = req[property]
     const { error }=schemas.validate(data, {abortEarly: false});
     if (error){
-      next(boom.badRequest(error));
+      return next(boom.badRequest(error));
     }
     next();
   }
