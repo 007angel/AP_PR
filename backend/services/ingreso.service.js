@@ -1,7 +1,10 @@
 const sequelize = require('../libs/sequelize')
+const CorrelativoTrService = require('./correlativo.service')
 
 class IngresoTrService{
-    constructor(){}
+    constructor(){
+        this.correlativoService = new CorrelativoTrService()
+    }
 
     async create(data){
         const newIngreso = await sequelize.models.IngresoTr.create(data)
@@ -45,21 +48,8 @@ class IngresoTrService{
         return ingresos
     }
 
-    async generateCorrelativo(){
-        const lastIngreso = await sequelize.models.IngresoTr.findOne({
-            order: [['id', 'DESC']],
-            raw: true
-        })
-        
-        let nextNumber = 1
-        if(lastIngreso && lastIngreso.correlativo){
-            const match = lastIngreso.correlativo.match(/ING-(\d+)/)
-            if(match){
-                nextNumber = parseInt(match[1]) + 1
-            }
-        }
-        
-        return `ING-${nextNumber.toString().padStart(5, '0')}`
+    async generateCorrelativo(companyId){
+        return await this.correlativoService.generateCorrelativo(companyId, 'ingreso', 'ING')
     }
 }
 

@@ -378,7 +378,7 @@ export class IngresoDetailComponent implements OnInit {
     this.ingreso.fechaDigitacion = this.formatDateForInput(new Date());
     this.ingreso.usuarioDigito = this.authService.getUser()?.name || '';
     
-    this.ingresoService.getCorrelativo().subscribe({
+    this.ingresoService.getCorrelativo(this.authService.getCompanyId() || 0).subscribe({
       next: (response) => {
         this.ingreso.correlativo = response.correlativo;
       },

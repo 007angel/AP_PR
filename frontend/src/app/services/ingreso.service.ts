@@ -31,7 +31,7 @@ export class IngresoService {
     return this.http.delete(`${this.apiUrl}/${id}`);
   }
 
-  getCorrelativo(): Observable<{ correlativo: string }> {
-    return this.http.get<{ correlativo: string }>(`${this.apiUrl}/correlativo`);
+  getCorrelativo(companyId: number): Observable<{ correlativo: string }> {
+    return this.http.get<{ correlativo: string }>(`${this.apiUrl}/correlativo/${companyId}`);
   }
 }

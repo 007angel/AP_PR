@@ -17,10 +17,11 @@ async(req, res, next)=>{
 }
 )
 
-router.get('/correlativo',
+router.get('/correlativo/:companyId',
 async(req, res, next)=>{
   try{
-    const correlativo = await service.generateCorrelativo();
+    const{ companyId }= req.params;
+    const correlativo = await service.generateCorrelativo(companyId);
     res.json({ correlativo })
   }catch(error){
     next(error)
