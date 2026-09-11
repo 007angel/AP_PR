@@ -75,32 +75,32 @@ import { Ingreso } from '../../../models/ingreso.model';
 
                 <div class="form-group">
                   <label>Total Ingreso *</label>
-                  <input type="number" [(ngModel)]="formData.totalIngreso" name="totalIngreso" required min="0">
+                  <input type="number" [(ngModel)]="formData.totalIngreso" name="totalIngreso" required min="0" (ngModelChange)="calcularCostoIndividual()">
                 </div>
 
                 <div class="form-group">
-                  <label>Solicitado *</label>
-                  <input type="number" [(ngModel)]="formData.solicitado" name="solicitado" required min="0">
+                  <label>Solicitado</label>
+                  <input type="number" [(ngModel)]="formData.solicitado" name="solicitado" min="0" readonly>
                 </div>
 
                 <div class="form-group">
-                  <label>Entregado *</label>
-                  <input type="number" [(ngModel)]="formData.entregado" name="entregado" required min="0">
+                  <label>Entregado</label>
+                  <input type="number" [(ngModel)]="formData.entregado" name="entregado" min="0" readonly>
                 </div>
 
                 <div class="form-group">
-                  <label>Mermas *</label>
-                  <input type="number" [(ngModel)]="formData.mermas" name="mermas" required min="0">
+                  <label>Mermas</label>
+                  <input type="number" [(ngModel)]="formData.mermas" name="mermas" min="0" readonly>
                 </div>
 
                 <div class="form-group">
-                  <label>Devolucion *</label>
-                  <input type="number" [(ngModel)]="formData.devolucion" name="devolucion" required min="0">
+                  <label>Devolucion</label>
+                  <input type="number" [(ngModel)]="formData.devolucion" name="devolucion" min="0" readonly>
                 </div>
 
                 <div class="form-group">
-                  <label>Costo Individual *</label>
-                  <input type="number" [(ngModel)]="formData.costoIndividual" name="costoIndividual" required min="0" step="0.01">
+                  <label>Costo Individual ($)</label>
+                  <input type="number" [(ngModel)]="formData.costoIndividual" name="costoIndividual" readonly step="0.01">
                 </div>
               </div>
 
@@ -319,6 +319,12 @@ import { Ingreso } from '../../../models/ingreso.model';
 
         &::placeholder {
           color: var(--text-tertiary);
+        }
+
+        &[readonly] {
+          background: var(--bg-secondary);
+          color: var(--text-secondary);
+          cursor: not-allowed;
         }
       }
     }
@@ -558,6 +564,14 @@ export class IngresoDetalleFormComponent implements OnInit {
         error: () => {
         }
       });
+    }
+  }
+
+  calcularCostoIndividual() {
+    if (this.ingreso && this.ingreso.valorTotal && this.formData.totalIngreso && this.formData.totalIngreso > 0) {
+      this.formData.costoIndividual = this.ingreso.valorTotal / this.formData.totalIngreso;
+    } else {
+      this.formData.costoIndividual = 0;
     }
   }
 }

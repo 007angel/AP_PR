@@ -53,6 +53,12 @@ const IngresoTrSchema={
     type:DataTypes.STRING,
     defaultValue:'pendiente'
   },
+  valorTotal:{
+    allowNull:true,
+    type:DataTypes.DECIMAL(10, 2),
+    field:'valor_total',
+    defaultValue:0
+  },
   companyId:{
     allowNull:true,
     type:DataTypes.INTEGER,

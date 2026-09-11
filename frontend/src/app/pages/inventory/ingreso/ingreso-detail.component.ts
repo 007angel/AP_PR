@@ -145,6 +145,25 @@ import { Ingreso } from '../../../models/ingreso.model';
               </div>
             </div>
 
+            <div class="form-row">
+              <div class="form-group">
+                <label for="valorTotal">Valor Total ($)</label>
+                <input
+                  type="number"
+                  id="valorTotal"
+                  name="valorTotal"
+                  [(ngModel)]="ingreso.valorTotal"
+                  placeholder="0.00"
+                  min="0"
+                  step="0.01"
+                />
+              </div>
+
+              <div class="form-group">
+                <label for="observaciones">Observaciones</label>
+              </div>
+            </div>
+
             <div class="form-group full-width">
               <label for="observaciones">Observaciones</label>
               <textarea
@@ -349,7 +368,8 @@ export class IngresoDetailComponent implements OnInit {
     usuarioDigito: '',
     proveedor: '',
     observaciones: '',
-    status: 'pendiente'
+    status: 'pendiente',
+    valorTotal: 0
   };
 
   isSaving = false;

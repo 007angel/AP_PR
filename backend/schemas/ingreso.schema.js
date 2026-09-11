@@ -10,6 +10,7 @@ const usuarioDigito = Joi.string().min(2).max(100);
 const proveedor = Joi.string().max(100).allow('', null);
 const observaciones = Joi.string().max(500).allow('', null);
 const status = Joi.string().valid('pendiente', 'completado', 'cancelado');
+const valorTotal = Joi.number().min(0);
 const companyId = Joi.number().integer();
 const userId = Joi.number().integer();
 
@@ -23,6 +24,7 @@ const createIngresoSchema = Joi.object({
   proveedor:proveedor.optional(),
   observaciones:observaciones.optional(),
   status:status.optional(),
+  valor_total:valorTotal.optional(),
   companyId:companyId.optional(),
   userId:userId.optional()
 })
@@ -37,6 +39,7 @@ const updateIngresoSchema = Joi.object({
   proveedor:proveedor,
   observaciones:observaciones,
   status:status,
+  valor_total:valorTotal,
   companyId:companyId,
   userId:userId
 })

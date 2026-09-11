@@ -9,6 +9,7 @@ export interface Ingreso {
   proveedor?: string;
   observaciones?: string;
   status?: 'pendiente' | 'completado' | 'cancelado';
+  valorTotal?: number;
   companyId?: number;
   userId?: number;
   createdAt?: Date | string;
