@@ -10,12 +10,28 @@ class UserTrService{
             ...data,
             password: hash
         })
-        return newUser
+        const { password, ...rest } = newUser.dataValues
+        return rest
     }
 
     async find(){
         const users = await sequelize.models.UserTr.findAll({ raw: true })
         return users.map(({ password, ...rest }) => rest)
+    }
+
+    async findByCompany(companyId){
+        const users = await sequelize.models.UserTr.findAll({
+            where: { companyId },
+            raw: true
+        })
+        return users.map(({ password, ...rest }) => rest)
+    }
+
+    async countByCompany(companyId){
+        const count = await sequelize.models.UserTr.count({
+            where: { companyId }
+        })
+        return count
     }
 
     async findOne(id){

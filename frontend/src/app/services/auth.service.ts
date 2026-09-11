@@ -68,6 +68,11 @@ export class AuthService {
     return this.getRole() === 'user';
   }
 
+  getCompanyId(): number | null {
+    const user = this.getUser();
+    return user?.companyId || null;
+  }
+
   hasRole(roles: string[]): boolean {
     return roles.includes(this.getRole());
   }

@@ -38,12 +38,12 @@ export class UserListComponent implements OnInit {
   isSaving = false;
 
   availableModules = [
-    { id: 'users', name: 'Gestión de Usuarios', icon: '👥' },
-    { id: 'dashboard', name: 'Dashboard', icon: '📊' },
-    { id: 'reports', name: 'Reportes', icon: '📈' },
-    { id: 'settings', name: 'Configuración', icon: '⚙️' },
-    { id: 'billing', name: 'Facturación', icon: '💳' },
-    { id: 'support', name: 'Soporte', icon: '🛠️' }
+    { id: 'users', name: 'Gestion de Usuarios' },
+    { id: 'dashboard', name: 'Dashboard' },
+    { id: 'reports', name: 'Reportes' },
+    { id: 'settings', name: 'Configuracion' },
+    { id: 'billing', name: 'Facturacion' },
+    { id: 'support', name: 'Soporte' }
   ];
 
   // Company assignment modal
@@ -64,18 +64,35 @@ export class UserListComponent implements OnInit {
 
   loadUsers() {
     this.isLoading = true;
-    this.userService.findAll().subscribe({
-      next: (data) => {
-        this.users = data;
-        this.filteredUsers = data;
-        this.isLoading = false;
-        this.updateSelectAll();
-      },
-      error: (err) => {
-        this.errorMessage = 'Error al cargar usuarios';
-        this.isLoading = false;
-      }
-    });
+    const companyId = this.authService.getCompanyId();
+
+    if (this.authService.isAdmin() && companyId) {
+      this.userService.findByCompany(companyId).subscribe({
+        next: (data) => {
+          this.users = data;
+          this.filteredUsers = data;
+          this.isLoading = false;
+          this.updateSelectAll();
+        },
+        error: (err) => {
+          this.errorMessage = 'Error al cargar usuarios';
+          this.isLoading = false;
+        }
+      });
+    } else {
+      this.userService.findAll().subscribe({
+        next: (data) => {
+          this.users = data;
+          this.filteredUsers = data;
+          this.isLoading = false;
+          this.updateSelectAll();
+        },
+        error: (err) => {
+          this.errorMessage = 'Error al cargar usuarios';
+          this.isLoading = false;
+        }
+      });
+    }
   }
 
   filterUsers() {

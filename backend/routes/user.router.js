@@ -9,8 +9,38 @@ const service = new userService();
 router.get('/',
 async(req, res, next)=>{
   try{
-    const users = await service.find();
+    const { companyId } = req.query
+    let users
+    if(companyId){
+      users = await service.findByCompany(parseInt(companyId))
+    }else{
+      users = await service.find();
+    }
     res.json(users)
+  }catch(error){
+    next(error)
+  }
+}
+)
+
+router.get('/by-company/:companyId',
+async(req, res, next)=>{
+  try{
+    const { companyId } = req.params
+    const users = await service.findByCompany(parseInt(companyId))
+    res.json(users)
+  }catch(error){
+    next(error)
+  }
+}
+)
+
+router.get('/count-by-company/:companyId',
+async(req, res, next)=>{
+  try{
+    const { companyId } = req.params
+    const count = await service.countByCompany(parseInt(companyId))
+    res.json({ count })
   }catch(error){
     next(error)
   }
@@ -39,8 +69,7 @@ async(req, res, next)=>{
   try{
     const body = req.body;
     const user = await service.create(body);
-    const { password, ...safeUser } = user.dataValues;
-    res.status(201).json(safeUser)
+    res.status(201).json(user)
   }catch(error){
     next(error)
   }

@@ -1,19 +1,31 @@
 <div class="user-list-container">
   <div class="page-header">
     <div class="header-content">
-      <h1>Gestión de Usuarios</h1>
+      <h1>Gestion de Usuarios</h1>
       <p>Administra los usuarios del sistema</p>
     </div>
     <button class="btn-primary" routerLink="/users/new">
-      + Nuevo Usuario
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <line x1="12" y1="5" x2="12" y2="19"></line>
+        <line x1="5" y1="12" x2="19" y2="12"></line>
+      </svg>
+      Nuevo Usuario
     </button>
   </div>
 
   <div class="success-message" *ngIf="successMessage">
-    <span>✓</span> {{ successMessage }}
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <polyline points="20,6 9,17 4,12"></polyline>
+    </svg>
+    {{ successMessage }}
   </div>
 
   <div class="error-message" *ngIf="errorMessage && !showModal">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <circle cx="12" cy="12" r="10"></circle>
+      <line x1="15" y1="9" x2="9" y2="15"></line>
+      <line x1="9" y1="9" x2="15" y2="15"></line>
+    </svg>
     {{ errorMessage }}
   </div>
 
@@ -22,19 +34,19 @@
       <span class="stat-value">{{ users.length }}</span>
       <span class="stat-label">Total Usuarios</span>
     </div>
-    <div class="stat-item">
+    <div class="stat-item stat-active">
       <span class="stat-value">{{ getStatusCount('active') }}</span>
       <span class="stat-label">Activos</span>
     </div>
-    <div class="stat-item">
+    <div class="stat-item stat-inactive">
       <span class="stat-value">{{ getStatusCount('inactive') }}</span>
       <span class="stat-label">Inactivos</span>
     </div>
-    <div class="stat-item">
+    <div class="stat-item stat-suspended">
       <span class="stat-value">{{ getStatusCount('suspended') }}</span>
       <span class="stat-label">Suspendidos</span>
     </div>
-    <div class="stat-item">
+    <div class="stat-item stat-trial">
       <span class="stat-value">{{ getStatusCount('trial') }}</span>
       <span class="stat-label">En Prueba</span>
     </div>
@@ -42,7 +54,10 @@
 
   <div class="filters-bar">
     <div class="search-box">
-      <span class="search-icon">🔍</span>
+      <svg class="search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="11" cy="11" r="8"></circle>
+        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+      </svg>
       <input 
         type="text" 
         placeholder="Buscar por nombre o email..." 
@@ -67,26 +82,44 @@
     </div>
   </div>
 
-  <!-- Bulk actions -->
   <div class="bulk-actions" *ngIf="getSelectedCount() > 0">
     <span class="selected-count">{{ getSelectedCount() }} seleccionado(s)</span>
     <button class="btn-bulk btn-activate" (click)="bulkActivate()">
-      ▶️ Activar
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+        <polygon points="5,3 19,12 5,21"></polygon>
+      </svg>
+      Activar
     </button>
     <button class="btn-bulk btn-deactivate" (click)="bulkDeactivate()">
-      ⏸️ Desactivar
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+        <rect x="6" y="4" width="4" height="16"></rect>
+        <rect x="14" y="4" width="4" height="16"></rect>
+      </svg>
+      Desactivar
     </button>
     <button class="btn-bulk btn-clear" (click)="clearSelection()">
-      ✕ Limpiar
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <line x1="18" y1="6" x2="6" y2="18"></line>
+        <line x1="6" y1="6" x2="18" y2="18"></line>
+      </svg>
+      Limpiar
     </button>
   </div>
 
   <div *ngIf="isLoading" class="loading">
+    <div class="spinner"></div>
     Cargando usuarios...
   </div>
 
   <div *ngIf="!isLoading && filteredUsers.length === 0" class="empty-state">
-    <div class="empty-icon">👤</div>
+    <div class="empty-icon">
+      <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#cbd5e1" stroke-width="1.5">
+        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+        <circle cx="9" cy="7" r="4"></circle>
+        <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+        <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+      </svg>
+    </div>
     <h3>No hay usuarios registrados</h3>
     <p>Crea el primer usuario para comenzar</p>
     <button class="btn-primary" routerLink="/users/new">Crear Usuario</button>
@@ -108,9 +141,9 @@
           <th>Nombre</th>
           <th>Email</th>
           <th>Rol</th>
-          <th>Módulos</th>
+          <th>Modulos</th>
           <th>Estado</th>
-          <th>Días</th>
+          <th>Dias</th>
           <th>Acciones</th>
         </tr>
       </thead>
@@ -145,10 +178,22 @@
           </td>
           <td class="actions-cell">
             <button class="btn-icon btn-company" (click)="openCompanyModal(user)" title="Asignar Empresa" *ngIf="authService.isMaster()">
-              🏢
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M3 21h18"></path>
+                <path d="M9 8h1"></path>
+                <path d="M9 12h1"></path>
+                <path d="M9 16h1"></path>
+                <path d="M14 8h1"></path>
+                <path d="M14 12h1"></path>
+                <path d="M14 16h1"></path>
+                <path d="M5 21V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16"></path>
+              </svg>
             </button>
             <button class="btn-icon btn-config" (click)="openEditModal(user)" title="Configurar" *ngIf="authService.isMaster()">
-              ⚙️
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="3"></circle>
+                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+              </svg>
             </button>
             <button 
               class="btn-icon" 
@@ -157,13 +202,27 @@
               [title]="user.status === 'active' ? 'Desactivar' : 'Activar'"
               *ngIf="authService.isMaster()"
             >
-              {{ user.status === 'active' ? '⏸️' : '▶️' }}
+              <svg *ngIf="user.status === 'active'" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="6" y="4" width="4" height="16"></rect>
+                <rect x="14" y="4" width="4" height="16"></rect>
+              </svg>
+              <svg *ngIf="user.status !== 'active'" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                <polygon points="5,3 19,12 5,21"></polygon>
+              </svg>
             </button>
             <button class="btn-icon btn-edit" [routerLink]="['/users/edit', user.id]" title="Editar">
-              ✏️
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+              </svg>
             </button>
             <button class="btn-icon btn-delete" (click)="deleteUser(user.id!)" title="Eliminar">
-              🗑️
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="3 6 5 6 21 6"></polyline>
+                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                <line x1="10" y1="11" x2="10" y2="17"></line>
+                <line x1="14" y1="11" x2="14" y2="17"></line>
+              </svg>
             </button>
           </td>
         </tr>
@@ -172,12 +231,16 @@
   </div>
 </div>
 
-<!-- Modal de edición rápida -->
 <div class="modal-overlay" *ngIf="showModal" (click)="closeModal()">
   <div class="modal-content" (click)="$event.stopPropagation()">
     <div class="modal-header">
       <h2>Configurar Usuario</h2>
-      <button class="modal-close" (click)="closeModal()">×</button>
+      <button class="modal-close" (click)="closeModal()">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
     </div>
     
     <div class="modal-body" *ngIf="selectedUser">
@@ -201,16 +264,28 @@
             [class.selected]="editRole === 'user'"
             (click)="editRole = 'user'"
           >
-            <span class="role-icon">👤</span>
+            <div class="role-icon role-user-icon">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                <circle cx="12" cy="7" r="4"></circle>
+              </svg>
+            </div>
             <span class="role-name">Usuario</span>
-            <span class="role-desc">Usa módulos asignados</span>
+            <span class="role-desc">Usa modulos asignados</span>
           </button>
           <button 
             class="role-option" 
             [class.selected]="editRole === 'admin'"
             (click)="editRole = 'admin'"
           >
-            <span class="role-icon">👨‍💼</span>
+            <div class="role-icon role-admin-icon">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                <circle cx="9" cy="7" r="4"></circle>
+                <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+              </svg>
+            </div>
             <span class="role-name">Admin</span>
             <span class="role-desc">Gestiona usuarios</span>
           </button>
@@ -219,7 +294,11 @@
             [class.selected]="editRole === 'master'"
             (click)="editRole = 'master'"
           >
-            <span class="role-icon">👑</span>
+            <div class="role-icon role-master-icon">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+              </svg>
+            </div>
             <span class="role-name">Master</span>
             <span class="role-desc">Control total</span>
           </button>
@@ -234,34 +313,38 @@
             [class.selected]="editStatus === 'active'"
             (click)="editStatus = 'active'"
           >
-            <span>✅</span> Activo
+            <span class="status-dot dot-active"></span>
+            Activo
           </button>
           <button 
             class="status-option inactive" 
             [class.selected]="editStatus === 'inactive'"
             (click)="editStatus = 'inactive'"
           >
-            <span>⏸️</span> Inactivo
+            <span class="status-dot dot-inactive"></span>
+            Inactivo
           </button>
           <button 
             class="status-option suspended" 
             [class.selected]="editStatus === 'suspended'"
             (click)="editStatus = 'suspended'"
           >
-            <span>🚫</span> Suspendido
+            <span class="status-dot dot-suspended"></span>
+            Suspendido
           </button>
           <button 
             class="status-option trial" 
             [class.selected]="editStatus === 'trial'"
             (click)="editStatus = 'trial'"
           >
-            <span>🆓</span> Prueba
+            <span class="status-dot dot-trial"></span>
+            Prueba
           </button>
         </div>
       </div>
 
       <div class="form-group" *ngIf="editRole !== 'master'">
-        <label>Módulos asignados</label>
+        <label>Modulos asignados</label>
         <div class="modules-grid">
           <div 
             *ngFor="let module of availableModules" 
@@ -269,9 +352,12 @@
             [class.selected]="isModuleSelected(module.id)"
             (click)="toggleModule(module.id)"
           >
-            <span class="module-icon">{{ module.icon }}</span>
             <span class="module-name">{{ module.name }}</span>
-            <span class="check-icon">{{ isModuleSelected(module.id) ? '✓' : '' }}</span>
+            <div class="check-icon">
+              <svg *ngIf="isModuleSelected(module.id)" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg>
+            </div>
           </div>
         </div>
       </div>
@@ -287,12 +373,16 @@
   </div>
 </div>
 
-<!-- Modal de asignar empresa -->
 <div class="modal-overlay" *ngIf="showCompanyModal" (click)="closeCompanyModal()">
   <div class="modal-content" (click)="$event.stopPropagation()">
     <div class="modal-header">
       <h2>Asignar Empresa</h2>
-      <button class="modal-close" (click)="closeCompanyModal()">×</button>
+      <button class="modal-close" (click)="closeCompanyModal()">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
     </div>
     
     <div class="modal-body" *ngIf="selectedUser">
@@ -311,12 +401,32 @@
       <div class="form-group">
         <label>Empresa actual</label>
         <div class="current-company" *ngIf="selectedUser.companyId">
-          <span class="company-name">{{ getCompanyName(selectedUser.companyId) }}</span>
+          <div class="company-info">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2">
+              <path d="M3 21h18"></path>
+              <path d="M9 8h1"></path>
+              <path d="M9 12h1"></path>
+              <path d="M9 16h1"></path>
+              <path d="M14 8h1"></path>
+              <path d="M14 12h1"></path>
+              <path d="M14 16h1"></path>
+              <path d="M5 21V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16"></path>
+            </svg>
+            <span class="company-name">{{ getCompanyName(selectedUser.companyId) }}</span>
+          </div>
           <button class="btn-unlink" (click)="unlinkCompany()" [disabled]="isAssigningCompany">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M18 6L6 18"></path>
+              <path d="M6 6l12 12"></path>
+            </svg>
             Desvincular
           </button>
         </div>
         <div class="no-company" *ngIf="!selectedUser.companyId">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="8" y1="12" x2="16" y2="12"></line>
+          </svg>
           <span>Sin empresa asignada</span>
         </div>
       </div>

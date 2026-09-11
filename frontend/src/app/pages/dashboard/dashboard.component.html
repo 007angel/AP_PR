@@ -1,36 +1,83 @@
 <div class="dashboard-layout">
   <aside class="sidebar">
     <div class="sidebar-header">
-      <span class="logo-icon">⚡</span>
+      <div class="logo-icon">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+        </svg>
+      </div>
       <span class="logo-text">TechSolutions</span>
     </div>
 
     <nav class="sidebar-nav">
       <a routerLink="/dashboard" class="nav-item active">
-        <span class="nav-icon">📊</span>
-        Dashboard
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="3" y="3" width="7" height="7"></rect>
+          <rect x="14" y="3" width="7" height="7"></rect>
+          <rect x="14" y="14" width="7" height="7"></rect>
+          <rect x="3" y="14" width="7" height="7"></rect>
+        </svg>
+        <span>Dashboard</span>
       </a>
       <a *ngIf="isMaster() || isAdmin()" routerLink="/users" class="nav-item">
-        <span class="nav-icon">👥</span>
-        Usuarios
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+          <circle cx="9" cy="7" r="4"></circle>
+          <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+          <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+        </svg>
+        <span>Usuarios</span>
       </a>
       <a *ngIf="isMaster() || isAdmin()" routerLink="/companies" class="nav-item">
-        <span class="nav-icon">🏢</span>
-        Empresas
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M3 21h18"></path>
+          <path d="M9 8h1"></path>
+          <path d="M9 12h1"></path>
+          <path d="M9 16h1"></path>
+          <path d="M14 8h1"></path>
+          <path d="M14 12h1"></path>
+          <path d="M14 16h1"></path>
+          <path d="M5 21V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16"></path>
+        </svg>
+        <span>Empresas</span>
       </a>
       <ng-container *ngIf="isMaster()">
         <a routerLink="/modules" class="nav-item">
-          <span class="nav-icon">📦</span>
-          Módulos
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+            <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+            <line x1="12" y1="22.08" x2="12" y2="12"></line>
+          </svg>
+          <span>Modulos</span>
         </a>
         <a routerLink="/settings" class="nav-item">
-          <span class="nav-icon">⚙️</span>
-          Configuración
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="3"></circle>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+          </svg>
+          <span>Configuracion</span>
         </a>
       </ng-container>
     </nav>
 
     <div class="sidebar-footer">
+      <button class="theme-toggle" (click)="themeService.toggleTheme()" [title]="themeService.isDark() ? 'Modo claro' : 'Modo oscuro'">
+        <svg *ngIf="!themeService.isDark()" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+        </svg>
+        <svg *ngIf="themeService.isDark()" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="5"></circle>
+          <line x1="12" y1="1" x2="12" y2="3"></line>
+          <line x1="12" y1="21" x2="12" y2="23"></line>
+          <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+          <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+          <line x1="1" y1="12" x2="3" y2="12"></line>
+          <line x1="21" y1="12" x2="23" y2="12"></line>
+          <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+          <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+        </svg>
+      </button>
+
       <div class="user-info">
         <div class="user-avatar">{{ currentUser?.name?.charAt(0) || 'U' }}</div>
         <div class="user-details">
@@ -39,7 +86,11 @@
         </div>
       </div>
       <button class="btn-logout" (click)="logout()">
-        <span>🚪</span>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+          <polyline points="16 17 21 12 16 7"></polyline>
+          <line x1="21" y1="12" x2="9" y2="12"></line>
+        </svg>
       </button>
     </div>
   </aside>
@@ -48,8 +99,8 @@
     <header class="top-bar">
       <div class="top-bar-left">
         <h1>Dashboard</h1>
-        <p *ngIf="isMaster()">Panel de administración master</p>
-        <p *ngIf="isAdmin()">Panel de administración</p>
+        <p *ngIf="isMaster()">Panel de administracion master</p>
+        <p *ngIf="isAdmin()">Panel de administracion</p>
         <p *ngIf="isUser()">Mi panel de trabajo</p>
       </div>
       <div class="top-bar-right">
@@ -58,12 +109,21 @@
     </header>
 
     <div class="content-area">
-      <div *ngIf="isLoading" class="loading">Cargando datos...</div>
+      <div *ngIf="isLoading" class="loading">
+        <div class="spinner"></div>
+        Cargando datos...
+      </div>
 
-      <!-- Stats para Master y Admin -->
-      <div *ngIf="!isLoading && (isMaster() || isAdmin())" class="stats-grid">
+      <div *ngIf="!isLoading && isMaster()" class="stats-grid">
         <div class="stat-card stat-total">
-          <div class="stat-icon">👥</div>
+          <div class="stat-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+              <circle cx="9" cy="7" r="4"></circle>
+              <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+              <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+            </svg>
+          </div>
           <div class="stat-info">
             <span class="stat-value">{{ totalUsers }}</span>
             <span class="stat-label">Total Usuarios</span>
@@ -71,15 +131,25 @@
         </div>
 
         <div class="stat-card stat-active">
-          <div class="stat-icon">✅</div>
+          <div class="stat-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+              <polyline points="22 4 12 14.01 9 11.01"></polyline>
+            </svg>
+          </div>
           <div class="stat-info">
             <span class="stat-value">{{ activeUsers }}</span>
             <span class="stat-label">Activos</span>
           </div>
         </div>
 
-        <div class="stat-card stat-trial" *ngIf="isMaster()">
-          <div class="stat-icon">🆓</div>
+        <div class="stat-card stat-trial">
+          <div class="stat-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"></circle>
+              <polyline points="12 6 12 12 16 14"></polyline>
+            </svg>
+          </div>
           <div class="stat-info">
             <span class="stat-value">{{ trialUsers }}</span>
             <span class="stat-label">En Prueba</span>
@@ -87,7 +157,12 @@
         </div>
 
         <div class="stat-card stat-inactive">
-          <div class="stat-icon">⏸️</div>
+          <div class="stat-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="6" y="4" width="4" height="16"></rect>
+              <rect x="14" y="4" width="4" height="16"></rect>
+            </svg>
+          </div>
           <div class="stat-info">
             <span class="stat-value">{{ inactiveUsers }}</span>
             <span class="stat-label">Inactivos</span>
@@ -95,7 +170,12 @@
         </div>
 
         <div class="stat-card stat-suspended">
-          <div class="stat-icon">🚫</div>
+          <div class="stat-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"></circle>
+              <line x1="4.93" y1="4.93" x2="19.07" y2="19.07"></line>
+            </svg>
+          </div>
           <div class="stat-info">
             <span class="stat-value">{{ suspendedUsers }}</span>
             <span class="stat-label">Suspendidos</span>
@@ -103,15 +183,90 @@
         </div>
       </div>
 
-      <!-- Módulos asignados para usuarios -->
+      <div *ngIf="!isLoading && isMaster()" class="company-stats-grid">
+        <div class="stat-card stat-companies">
+          <div class="stat-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M3 21h18"></path>
+              <path d="M9 8h1"></path>
+              <path d="M9 12h1"></path>
+              <path d="M9 16h1"></path>
+              <path d="M14 8h1"></path>
+              <path d="M14 12h1"></path>
+              <path d="M14 16h1"></path>
+              <path d="M5 21V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16"></path>
+            </svg>
+          </div>
+          <div class="stat-info">
+            <span class="stat-value">{{ totalCompanies }}</span>
+            <span class="stat-label">Total Empresas</span>
+          </div>
+        </div>
+
+        <div class="stat-card stat-companies-active">
+          <div class="stat-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+              <polyline points="22 4 12 14.01 9 11.01"></polyline>
+            </svg>
+          </div>
+          <div class="stat-info">
+            <span class="stat-value">{{ activeCompanies }}</span>
+            <span class="stat-label">Empresas Activas</span>
+          </div>
+        </div>
+      </div>
+
+      <div *ngIf="!isLoading && isAdmin()" class="stats-grid">
+        <div class="stat-card stat-total">
+          <div class="stat-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+              <circle cx="9" cy="7" r="4"></circle>
+              <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+              <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+            </svg>
+          </div>
+          <div class="stat-info">
+            <span class="stat-value">{{ totalUsers }}</span>
+            <span class="stat-label">Total Usuarios</span>
+          </div>
+        </div>
+
+        <div class="stat-card stat-active">
+          <div class="stat-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+              <polyline points="22 4 12 14.01 9 11.01"></polyline>
+            </svg>
+          </div>
+          <div class="stat-info">
+            <span class="stat-value">{{ activeUsers }}</span>
+            <span class="stat-label">Activos</span>
+          </div>
+        </div>
+
+        <div class="stat-card stat-inactive">
+          <div class="stat-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="6" y="4" width="4" height="16"></rect>
+              <rect x="14" y="4" width="4" height="16"></rect>
+            </svg>
+          </div>
+          <div class="stat-info">
+            <span class="stat-value">{{ inactiveUsers }}</span>
+            <span class="stat-label">Inactivos</span>
+          </div>
+        </div>
+      </div>
+
       <div *ngIf="!isLoading && isUser()" class="modules-section">
-        <h2>Mis Módulos Asignados</h2>
+        <h2>Mis Modulos Asignados</h2>
         <div class="modules-grid">
           <div *ngFor="let module of availableModules" 
                class="module-card" 
                [class.assigned]="hasModule(module.id)"
                [class.locked]="!hasModule(module.id)">
-            <span class="module-icon">{{ module.icon }}</span>
             <h3>{{ module.name }}</h3>
             <p>{{ module.description }}</p>
             <span *ngIf="hasModule(module.id)" class="module-status available">Disponible</span>
@@ -120,12 +275,11 @@
         </div>
       </div>
 
-      <!-- Contenido para Master y Admin -->
       <div *ngIf="!isLoading && (isMaster() || isAdmin())" class="content-grid">
         <div class="card recent-users">
           <div class="card-header">
             <h3>Usuarios Recientes</h3>
-            <a routerLink="/users" class="view-all">Ver todos →</a>
+            <a routerLink="/users" class="view-all">Ver todos</a>
           </div>
           <div class="card-body">
             <div *ngIf="recentUsers.length === 0" class="empty-state">
@@ -149,30 +303,87 @@
           </div>
         </div>
 
+        <div class="card recent-companies" *ngIf="isMaster()">
+          <div class="card-header">
+            <h3>Empresas Recientes</h3>
+            <a routerLink="/companies" class="view-all">Ver todas</a>
+          </div>
+          <div class="card-body">
+            <div *ngIf="recentCompanies.length === 0" class="empty-state">
+              <p>No hay empresas registradas</p>
+              <a routerLink="/companies/new" class="btn-primary">Crear Empresa</a>
+            </div>
+            <div *ngIf="recentCompanies.length > 0" class="company-list">
+              <div *ngFor="let company of recentCompanies" class="company-item">
+                <div class="company-icon">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M3 21h18"></path>
+                    <path d="M9 8h1"></path>
+                    <path d="M9 12h1"></path>
+                    <path d="M9 16h1"></path>
+                    <path d="M14 8h1"></path>
+                    <path d="M14 12h1"></path>
+                    <path d="M14 16h1"></path>
+                    <path d="M5 21V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16"></path>
+                  </svg>
+                </div>
+                <div class="company-info">
+                  <span class="company-name">{{ company.name }}</span>
+                  <span class="company-email">{{ company.email }}</span>
+                </div>
+                <div class="company-meta">
+                  <span class="plan-tag" [class]="company.plan">{{ company.plan }}</span>
+                  <span class="status-badge" [class]="'status-' + company.status">
+                    {{ company.status === 'active' ? 'Activa' : company.status === 'inactive' ? 'Inactiva' : 'Suspendida' }}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <div class="card quick-actions">
           <div class="card-header">
-            <h3>Acciones Rápidas</h3>
+            <h3>Acciones Rapidas</h3>
           </div>
           <div class="card-body">
             <button *ngIf="isMaster() || isAdmin()" class="action-btn" (click)="openCreateModal()">
-              <span class="action-icon">➕</span>
+              <div class="action-icon">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <line x1="12" y1="5" x2="12" y2="19"></line>
+                  <line x1="5" y1="12" x2="19" y2="12"></line>
+                </svg>
+              </div>
               <div class="action-text">
                 <strong>Crear Usuario</strong>
                 <span>Agregar nuevo usuario al sistema</span>
               </div>
             </button>
             <button *ngIf="isMaster() || isAdmin()" class="action-btn" (click)="openUsersListModal()">
-              <span class="action-icon">👥</span>
+              <div class="action-icon">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                  <circle cx="9" cy="7" r="4"></circle>
+                  <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                  <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                </svg>
+              </div>
               <div class="action-text">
                 <strong>Gestionar Usuarios</strong>
                 <span>Administrar cuentas y permisos</span>
               </div>
             </button>
             <a *ngIf="isMaster()" routerLink="/modules" class="action-btn">
-              <span class="action-icon">📦</span>
+              <div class="action-icon">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                  <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+                  <line x1="12" y1="22.08" x2="12" y2="12"></line>
+                </svg>
+              </div>
               <div class="action-text">
-                <strong>Asignar Módulos</strong>
-                <span>Configurar módulos por usuario</span>
+                <strong>Asignar Modulos</strong>
+                <span>Configurar modulos por usuario</span>
               </div>
             </a>
           </div>
@@ -182,12 +393,16 @@
   </main>
 </div>
 
-<!-- Modal de gestión de usuario -->
 <div class="modal-overlay" *ngIf="showUserModal" (click)="closeUserModal()">
   <div class="modal-content" (click)="$event.stopPropagation()">
     <div class="modal-header">
-      <h2>Gestión de Cuenta</h2>
-      <button class="modal-close" (click)="closeUserModal()">×</button>
+      <h2>Gestion de Cuenta</h2>
+      <button class="modal-close" (click)="closeUserModal()">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
     </div>
     
     <div class="modal-body" *ngIf="selectedUser">
@@ -200,7 +415,10 @@
       </div>
 
       <div class="success-message" *ngIf="modalSuccess">
-        <span>✓</span> {{ modalSuccess }}
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="20,6 9,17 4,12"></polyline>
+        </svg>
+        {{ modalSuccess }}
       </div>
 
       <div class="error-message" *ngIf="modalError">
@@ -221,12 +439,12 @@
           </label>
         </div>
         <span class="status-indicator" [class.active]="editStatus === 'active'">
-          {{ editStatus === 'active' ? '✅ Cuenta activa' : '⏸️ Cuenta inactiva' }}
+          {{ editStatus === 'active' ? 'Cuenta activa' : 'Cuenta inactiva' }}
         </span>
       </div>
 
       <div class="form-group">
-        <label>Módulos asignados</label>
+        <label>Modulos asignados</label>
         <div class="modules-grid">
           <div 
             *ngFor="let module of availableModules" 
@@ -234,12 +452,15 @@
             [class.selected]="isModuleSelected(module.id)"
             (click)="toggleModule(module.id)"
           >
-            <span class="module-icon">{{ module.icon }}</span>
             <div class="module-info">
               <span class="module-name">{{ module.name }}</span>
               <span class="module-desc">{{ module.description }}</span>
             </div>
-            <span class="check-icon">{{ isModuleSelected(module.id) ? '✓' : '' }}</span>
+            <div class="check-icon">
+              <svg *ngIf="isModuleSelected(module.id)" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg>
+            </div>
           </div>
         </div>
       </div>
@@ -255,17 +476,24 @@
   </div>
 </div>
 
-<!-- Modal de creación de usuario -->
 <div class="modal-overlay" *ngIf="showCreateModal" (click)="closeCreateModal()">
   <div class="modal-content" (click)="$event.stopPropagation()">
     <div class="modal-header">
       <h2>Crear Nuevo Usuario</h2>
-      <button class="modal-close" (click)="closeCreateModal()">×</button>
+      <button class="modal-close" (click)="closeCreateModal()">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
     </div>
     
     <div class="modal-body">
       <div class="success-message" *ngIf="modalSuccess">
-        <span>✓</span> {{ modalSuccess }}
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="20,6 9,17 4,12"></polyline>
+        </svg>
+        {{ modalSuccess }}
       </div>
 
       <div class="error-message" *ngIf="createError">
@@ -277,13 +505,13 @@
         <input 
           type="text" 
           class="form-input"
-          placeholder="Ej: Juan Pérez"
+          placeholder="Ej: Juan Perez"
           [(ngModel)]="newUser.name"
         />
       </div>
 
       <div class="form-group">
-        <label>Correo electrónico *</label>
+        <label>Correo electronico *</label>
         <input 
           type="email" 
           class="form-input"
@@ -293,11 +521,11 @@
       </div>
 
       <div class="form-group">
-        <label>Contraseña *</label>
+        <label>Contrasena *</label>
         <input 
           type="password" 
           class="form-input"
-          placeholder="Mínimo 8 caracteres"
+          placeholder="Minimo 8 caracteres"
           [(ngModel)]="newUser.password"
         />
       </div>
@@ -311,7 +539,12 @@
             (click)="newUser.role = 'user'"
             type="button"
           >
-            <span class="role-icon">👤</span>
+            <div class="role-icon role-user-icon">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                <circle cx="12" cy="7" r="4"></circle>
+              </svg>
+            </div>
             <span class="role-name">Usuario</span>
           </button>
           <button 
@@ -321,14 +554,21 @@
             *ngIf="isMaster()"
             type="button"
           >
-            <span class="role-icon">👨‍💼</span>
+            <div class="role-icon role-admin-icon">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                <circle cx="9" cy="7" r="4"></circle>
+                <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+              </svg>
+            </div>
             <span class="role-name">Admin</span>
           </button>
         </div>
       </div>
 
       <div class="form-group">
-        <label>Módulos a asignar</label>
+        <label>Modulos a asignar</label>
         <div class="modules-grid">
           <div 
             *ngFor="let module of availableModules" 
@@ -336,12 +576,15 @@
             [class.selected]="isCreateModuleSelected(module.id)"
             (click)="toggleCreateModule(module.id)"
           >
-            <span class="module-icon">{{ module.icon }}</span>
             <div class="module-info">
               <span class="module-name">{{ module.name }}</span>
               <span class="module-desc">{{ module.description }}</span>
             </div>
-            <span class="check-icon">{{ isCreateModuleSelected(module.id) ? '✓' : '' }}</span>
+            <div class="check-icon">
+              <svg *ngIf="isCreateModuleSelected(module.id)" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg>
+            </div>
           </div>
         </div>
       </div>
@@ -357,12 +600,16 @@
   </div>
 </div>
 
-<!-- Modal de listado de usuarios -->
 <div class="modal-overlay" *ngIf="showUsersListModal" (click)="closeUsersListModal()">
   <div class="modal-content modal-large" (click)="$event.stopPropagation()">
     <div class="modal-header">
       <h2>Todos los Usuarios ({{ users.length }})</h2>
-      <button class="modal-close" (click)="closeUsersListModal()">×</button>
+      <button class="modal-close" (click)="closeUsersListModal()">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
     </div>
     
     <div class="modal-body">

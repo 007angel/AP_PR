@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { RouterLink, Router } from '@angular/router';
-import { UserService } from '../../services/user.service';
+import { CompanyService } from '../../services/company.service';
 
 @Component({
   selector: 'app-register',
@@ -12,47 +12,87 @@ import { UserService } from '../../services/user.service';
   styleUrl: './register.component.scss'
 })
 export class RegisterComponent {
-  user = {
-    name: '',
-    email: '',
-    password: '',
-    confirmPassword: '',
-    role: 'user' as const,
-    status: 'active' as const
-  };
-  acceptTerms = false;
+  currentStep = 1;
   isLoading = false;
   errorMessage = '';
 
+  company = {
+    name: '',
+    rif: '',
+    email: '',
+    phone: '',
+    address: '',
+    city: '',
+    state: '',
+    country: 'Venezuela'
+  };
+
+  admin = {
+    name: '',
+    email: '',
+    password: '',
+    confirmPassword: ''
+  };
+
+  acceptTerms = false;
+
   constructor(
-    private userService: UserService,
+    private companyService: CompanyService,
     private router: Router
   ) {}
 
+  nextStep() {
+    if (this.currentStep === 1) {
+      if (!this.company.name || !this.company.rif || !this.company.email) {
+        this.errorMessage = 'Nombre, RIF y email de la empresa son requeridos';
+        return;
+      }
+    }
+    this.errorMessage = '';
+    this.currentStep++;
+  }
+
+  prevStep() {
+    this.errorMessage = '';
+    this.currentStep--;
+  }
+
   onSubmit() {
-    if (this.user.password !== this.user.confirmPassword) {
-      this.errorMessage = 'Las contraseñas no coinciden';
+    if (this.admin.password !== this.admin.confirmPassword) {
+      this.errorMessage = 'Las contrasenas no coinciden';
       return;
     }
     if (!this.acceptTerms) {
-      this.errorMessage = 'Debes aceptar los términos y condiciones';
+      this.errorMessage = 'Debes aceptar los terminos y condiciones';
       return;
     }
 
     this.isLoading = true;
     this.errorMessage = '';
 
-    const { confirmPassword, ...userData } = this.user;
+    const cleanCompany: any = {
+      name: this.company.name,
+      rif: this.company.rif,
+      email: this.company.email
+    };
+    if (this.company.phone) cleanCompany.phone = this.company.phone;
+    if (this.company.address) cleanCompany.address = this.company.address;
+    if (this.company.city) cleanCompany.city = this.company.city;
+    if (this.company.state) cleanCompany.state = this.company.state;
+    if (this.company.country) cleanCompany.country = this.company.country;
 
-    this.userService.create(userData).subscribe({
-      next: (created) => {
-        localStorage.setItem('user', JSON.stringify(created));
+    this.companyService.register(cleanCompany, {
+      name: this.admin.name,
+      email: this.admin.email,
+      password: this.admin.password
+    }).subscribe({
+      next: (result) => {
+        localStorage.setItem('user', JSON.stringify(result.admin));
         this.router.navigate(['/dashboard']);
       },
       error: (err) => {
-        this.errorMessage = err.error?.message || 'Error al crear usuario';
+        this.errorMessage = err.error?.message || 'Error al crear la empresa';
         this.isLoading = false;
-        console.error(err);
       }
     });
   }

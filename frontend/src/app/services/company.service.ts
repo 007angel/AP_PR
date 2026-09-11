@@ -24,6 +24,10 @@ export class CompanyService {
     return this.http.post<Company>(this.apiUrl, data);
   }
 
+  register(company: Partial<Company>, admin: { name: string; email: string; password: string }): Observable<{ company: Company; admin: User }> {
+    return this.http.post<{ company: Company; admin: User }>(`${this.apiUrl}/register`, { company, admin });
+  }
+
   update(id: number, changes: Partial<Company>): Observable<Company> {
     return this.http.put<Company>(`${this.apiUrl}/${id}`, changes);
   }

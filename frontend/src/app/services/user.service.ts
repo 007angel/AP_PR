@@ -15,6 +15,14 @@ export class UserService {
     return this.http.get<User[]>(this.apiUrl);
   }
 
+  findByCompany(companyId: number): Observable<User[]> {
+    return this.http.get<User[]>(`${this.apiUrl}?companyId=${companyId}`);
+  }
+
+  countByCompany(companyId: number): Observable<{ count: number }> {
+    return this.http.get<{ count: number }>(`${this.apiUrl}/count-by-company/${companyId}`);
+  }
+
   findOne(id: number): Observable<User> {
     return this.http.get<User>(`${this.apiUrl}/${id}`);
   }

@@ -3,8 +3,11 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink, Router } from '@angular/router';
 import { UserService } from '../../services/user.service';
+import { CompanyService } from '../../services/company.service';
 import { AuthService } from '../../services/auth.service';
+import { ThemeService } from '../../services/theme.service';
 import { User } from '../../models/user.model';
+import { Company } from '../../models/company.model';
 
 @Component({
   selector: 'app-dashboard',
@@ -15,12 +18,16 @@ import { User } from '../../models/user.model';
 })
 export class DashboardComponent implements OnInit {
   users: User[] = [];
+  companies: Company[] = [];
   totalUsers = 0;
   activeUsers = 0;
   inactiveUsers = 0;
   suspendedUsers = 0;
   trialUsers = 0;
+  totalCompanies = 0;
+  activeCompanies = 0;
   recentUsers: User[] = [];
+  recentCompanies: Company[] = [];
   isLoading = true;
   currentUser: User | null = null;
   userModules: string[] = [];
@@ -49,17 +56,19 @@ export class DashboardComponent implements OnInit {
   };
 
   availableModules = [
-    { id: 'users', name: 'Gestión de Usuarios', icon: '👥', description: 'Administrar cuentas y permisos' },
-    { id: 'dashboard', name: 'Dashboard', icon: '📊', description: 'Métricas y reportes en tiempo real' },
-    { id: 'reports', name: 'Reportes', icon: '📈', description: 'Generación de informes' },
-    { id: 'settings', name: 'Configuración', icon: '⚙️', description: 'Ajustes del sistema' },
-    { id: 'billing', name: 'Facturación', icon: '💳', description: 'Gestión de pagos' },
-    { id: 'support', name: 'Soporte', icon: '🛠️', description: 'Centro de ayuda' }
+    { id: 'users', name: 'Gestion de Usuarios', description: 'Administrar cuentas y permisos' },
+    { id: 'dashboard', name: 'Dashboard', description: 'Metricas y reportes en tiempo real' },
+    { id: 'reports', name: 'Reportes', description: 'Generacion de informes' },
+    { id: 'settings', name: 'Configuracion', description: 'Ajustes del sistema' },
+    { id: 'billing', name: 'Facturacion', description: 'Gestion de pagos' },
+    { id: 'support', name: 'Soporte', description: 'Centro de ayuda' }
   ];
 
   constructor(
     private userService: UserService,
+    private companyService: CompanyService,
     private authService: AuthService,
+    public themeService: ThemeService,
     private router: Router
   ) {}
 
@@ -70,26 +79,79 @@ export class DashboardComponent implements OnInit {
   }
 
   loadStats() {
-    if (this.authService.isMaster() || this.authService.isAdmin()) {
-      this.userService.findAll().subscribe({
-        next: (data) => {
-          this.users = data;
-          this.totalUsers = data.length;
-          this.activeUsers = data.filter(u => u.status === 'active').length;
-          this.inactiveUsers = data.filter(u => u.status === 'inactive').length;
-          this.suspendedUsers = data.filter(u => u.status === 'suspended').length;
-          this.trialUsers = data.filter(u => u.status === 'trial').length;
-          this.recentUsers = data.slice(-5).reverse();
-          this.isLoading = false;
-        },
-        error: (err) => {
-          console.error(err);
-          this.isLoading = false;
-        }
-      });
+    if (this.authService.isMaster()) {
+      this.loadAllData();
+    } else if (this.authService.isAdmin()) {
+      this.loadCompanyData();
     } else {
       this.isLoading = false;
     }
+  }
+
+  loadAllData() {
+    this.userService.findAll().subscribe({
+      next: (users) => {
+        this.users = users;
+        this.totalUsers = users.length;
+        this.activeUsers = users.filter(u => u.status === 'active').length;
+        this.inactiveUsers = users.filter(u => u.status === 'inactive').length;
+        this.suspendedUsers = users.filter(u => u.status === 'suspended').length;
+        this.trialUsers = users.filter(u => u.status === 'trial').length;
+        this.recentUsers = users.slice(-5).reverse();
+
+        this.companyService.findAll().subscribe({
+          next: (companies) => {
+            this.companies = companies;
+            this.totalCompanies = companies.length;
+            this.activeCompanies = companies.filter(c => c.status === 'active').length;
+            this.recentCompanies = companies.slice(-5).reverse();
+            this.isLoading = false;
+          },
+          error: () => {
+            this.isLoading = false;
+          }
+        });
+      },
+      error: () => {
+        this.isLoading = false;
+      }
+    });
+  }
+
+  loadCompanyData() {
+    const companyId = this.authService.getCompanyId();
+    if (!companyId) {
+      this.isLoading = false;
+      return;
+    }
+
+    this.userService.findByCompany(companyId).subscribe({
+      next: (users) => {
+        this.users = users;
+        this.totalUsers = users.length;
+        this.activeUsers = users.filter(u => u.status === 'active').length;
+        this.inactiveUsers = users.filter(u => u.status === 'inactive').length;
+        this.suspendedUsers = users.filter(u => u.status === 'suspended').length;
+        this.trialUsers = users.filter(u => u.status === 'trial').length;
+        this.recentUsers = users.slice(-5).reverse();
+
+        this.companyService.findOne(companyId).subscribe({
+          next: (company) => {
+            this.companies = [company];
+            this.totalCompanies = 1;
+            this.activeCompanies = company.status === 'active' ? 1 : 0;
+            this.recentCompanies = [company];
+            this.isLoading = false;
+          },
+          error: () => {
+            this.isLoading = false;
+          }
+        });
+      },
+      error: () => {
+        this.isLoading = false;
+      }
+    });
   }
 
   openUserModal(user: User) {
@@ -203,14 +265,20 @@ export class DashboardComponent implements OnInit {
 
   createUser() {
     if (!this.newUser.name || !this.newUser.email || !this.newUser.password) {
-      this.createError = 'Nombre, email y contraseña son requeridos';
+      this.createError = 'Nombre, email y contrasena son requeridos';
       return;
     }
 
     this.isCreating = true;
     this.createError = '';
 
-    this.userService.create(this.newUser).subscribe({
+    const userToCreate = { ...this.newUser };
+    const companyId = this.authService.getCompanyId();
+    if (this.authService.isAdmin() && companyId) {
+      userToCreate.companyId = companyId;
+    }
+
+    this.userService.create(userToCreate).subscribe({
       next: (created) => {
         this.users.unshift(created);
         this.totalUsers = this.users.length;

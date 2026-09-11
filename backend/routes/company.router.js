@@ -1,7 +1,7 @@
 const express = require('express');
 const companyService = require('../services/company.service');
 const validatorHandler = require('../middlewares/validator.handler');
-const { createCompanySchema, updateCompanySchema, getCompanySchema } = require('../schemas/company.schema');
+const { createCompanySchema, registerCompanySchema, updateCompanySchema, getCompanySchema } = require('../schemas/company.schema');
 
 const router = express.Router();
 const service = new companyService();
@@ -39,6 +39,22 @@ async(req, res, next)=>{
     const{ id }= req.params;
     const users= await service.getUsers(id);
     res.json(users)
+  }catch(error){
+    next(error)
+  }
+}
+)
+
+router.post('/register',
+validatorHandler(registerCompanySchema,'body'),
+async(req, res, next)=>{
+  try{
+    const { company: companyData, admin: adminData } = req.body;
+    const result = await service.register(companyData, adminData);
+    if(result.error){
+      return res.status(400).json({message: result.error})
+    }
+    res.status(201).json(result)
   }catch(error){
     next(error)
   }
