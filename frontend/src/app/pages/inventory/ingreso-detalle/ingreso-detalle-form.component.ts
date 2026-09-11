@@ -59,8 +59,8 @@ import { Ingreso } from '../../../models/ingreso.model';
                 </div>
 
                 <div class="form-group">
-                  <label>Tarima *</label>
-                  <input type="number" [(ngModel)]="formData.tarima" name="tarima" required min="0">
+                  <label>Tarima</label>
+                  <input type="number" [(ngModel)]="formData.tarima" name="tarima" readonly>
                 </div>
 
                 <div class="form-group">
@@ -75,7 +75,7 @@ import { Ingreso } from '../../../models/ingreso.model';
 
                 <div class="form-group">
                   <label>Total Ingreso *</label>
-                  <input type="number" [(ngModel)]="formData.totalIngreso" name="totalIngreso" required min="0" (ngModelChange)="calcularCostoIndividual()">
+                  <input type="number" [(ngModel)]="formData.totalIngreso" name="totalIngreso" required min="0">
                 </div>
 
                 <div class="form-group">
@@ -474,6 +474,7 @@ export class IngresoDetalleFormComponent implements OnInit {
     this.ingresoService.findOne(this.ingresoId).subscribe({
       next: (ingreso) => {
         this.ingreso = ingreso;
+        this.formData.tarima = ingreso.cantidadTarimas || 0;
         this.loadDetalles();
       },
       error: () => {
