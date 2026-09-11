@@ -70,6 +70,7 @@ import { Ingreso } from '../../../models/ingreso.model';
               <td>
                 <div class="action-buttons">
                   <a [routerLink]="['/inventory/ingreso', ingreso.id]" class="btn-action">Ver</a>
+                  <a [routerLink]="['/inventory/ingreso', ingreso.id, 'detalle']" class="btn-action btn-detalle">Detalle</a>
                   <button class="btn-action btn-delete" (click)="deleteIngreso(ingreso.id!)">Eliminar</button>
                 </div>
               </td>
@@ -125,6 +126,8 @@ import { Ingreso } from '../../../models/ingreso.model';
     .action-buttons { display: flex; gap: 8px; }
     .btn-action { padding: 6px 12px; font-size: 12px; color: var(--accent-primary); background: var(--accent-bg); border: 1px solid var(--accent-border); border-radius: var(--radius-md); text-decoration: none; transition: var(--transition); cursor: pointer; }
     .btn-action:hover { background: var(--accent-primary); color: white; }
+    .btn-detalle { color: var(--success-text); background: var(--success-bg); border-color: var(--success-border); }
+    .btn-detalle:hover { background: var(--success-text); color: white; }
     .btn-delete { color: var(--danger-text); background: var(--danger-bg); border-color: var(--danger-border); }
     .btn-delete:hover { background: var(--danger); color: white; }
   `]

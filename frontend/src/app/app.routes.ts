@@ -15,6 +15,7 @@ import { InventoryLayoutComponent } from './pages/inventory/inventory-layout.com
 import { InventoryDashboardComponent } from './pages/inventory/dashboard/inventory-dashboard.component';
 import { IngresoListComponent } from './pages/inventory/ingreso/ingreso-list.component';
 import { IngresoDetailComponent } from './pages/inventory/ingreso/ingreso-detail.component';
+import { IngresoDetalleFormComponent } from './pages/inventory/ingreso-detalle/ingreso-detalle-form.component';
 import { MovimientoDetailComponent } from './pages/inventory/ingreso/movimiento-detail.component';
 import { SalidaListComponent } from './pages/inventory/salida/salida-list.component';
 import { SalidaDetailComponent } from './pages/inventory/salida/salida-detail.component';
@@ -47,6 +48,7 @@ export const routes: Routes = [
       { path: 'ingreso', component: IngresoListComponent },
       { path: 'ingreso/new', component: IngresoDetailComponent },
       { path: 'ingreso/:id', component: IngresoDetailComponent },
+      { path: 'ingreso/:ingresoId/detalle', component: IngresoDetalleFormComponent },
       { path: 'ingreso/movimientos', component: MovimientoDetailComponent },
       { path: 'ingreso/movimientos/:id', component: MovimientoDetailComponent },
       { path: 'salida', component: SalidaListComponent },

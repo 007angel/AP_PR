@@ -4,6 +4,7 @@ const userTr = require('./user.router')
 const companyTr = require('./company.router')
 const ingresoTr = require('./ingreso.router')
 const correlativoTr = require('./correlativo.router')
+const ingresoDetalleTr = require('./ingreso-detalle.router')
 
 
 
@@ -16,6 +17,7 @@ function routerApi(app){
   router.use('/company',companyTr )
   router.use('/ingreso',ingresoTr )
   router.use('/correlativo',correlativoTr )
+  router.use('/ingreso-detalle',ingresoDetalleTr )
 
 }
 
