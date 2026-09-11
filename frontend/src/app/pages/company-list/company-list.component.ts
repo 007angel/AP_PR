@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { CompanyService } from '../../services/company.service';
 import { UserService } from '../../services/user.service';
+import { AuthService } from '../../services/auth.service';
 import { Company } from '../../models/company.model';
 import { User } from '../../models/user.model';
 
@@ -32,7 +33,8 @@ export class CompanyListComponent implements OnInit {
 
   constructor(
     private companyService: CompanyService,
-    private userService: UserService
+    private userService: UserService,
+    private authService: AuthService
   ) {}
 
   ngOnInit() {
@@ -42,28 +44,68 @@ export class CompanyListComponent implements OnInit {
 
   loadCompanies() {
     this.isLoading = true;
-    this.companyService.findAll().subscribe({
-      next: (data) => {
-        this.companies = data;
-        this.filteredCompanies = data;
-        this.isLoading = false;
-      },
-      error: (err) => {
-        this.errorMessage = 'Error al cargar empresas';
+
+    if (this.authService.isMaster()) {
+      this.companyService.findAll().subscribe({
+        next: (data) => {
+          this.companies = data;
+          this.filteredCompanies = data;
+          this.isLoading = false;
+        },
+        error: (err) => {
+          this.errorMessage = 'Error al cargar empresas';
+          this.isLoading = false;
+        }
+      });
+    } else if (this.authService.isAdmin()) {
+      const companyId = this.authService.getCompanyId();
+      if (companyId) {
+        this.companyService.findOne(companyId).subscribe({
+          next: (data) => {
+            this.companies = data ? [data] : [];
+            this.filteredCompanies = this.companies;
+            this.isLoading = false;
+          },
+          error: (err) => {
+            this.errorMessage = 'Error al cargar empresa';
+            this.isLoading = false;
+          }
+        });
+      } else {
+        this.companies = [];
+        this.filteredCompanies = [];
         this.isLoading = false;
       }
-    });
+    } else {
+      this.companies = [];
+      this.filteredCompanies = [];
+      this.isLoading = false;
+    }
   }
 
   loadUsers() {
-    this.userService.findAll().subscribe({
-      next: (data) => {
-        this.users = data;
-      },
-      error: (err) => {
-        console.error(err);
+    if (this.authService.isMaster()) {
+      this.userService.findAll().subscribe({
+        next: (data) => {
+          this.users = data;
+        },
+        error: (err) => {
+          console.error(err);
+        }
+      });
+    } else if (this.authService.isAdmin()) {
+      const companyId = this.authService.getCompanyId();
+      if (companyId) {
+        this.userService.findByCompany(companyId).subscribe({
+          next: (data) => {
+            this.users = data;
+          },
+          error: (err) => {
+            console.error(err);
+          }
+        });
       }
-    });
+    }
   }
 
   filterCompanies() {
@@ -98,6 +140,14 @@ export class CompanyListComponent implements OnInit {
 
   getStatusClass(status: string): string {
     return `status-${status}`;
+  }
+
+  isMaster(): boolean {
+    return this.authService.isMaster();
+  }
+
+  isAdmin(): boolean {
+    return this.authService.isAdmin();
   }
 
   // Link users modal

@@ -4,7 +4,7 @@
       <h1>Gestión de Empresas</h1>
       <p>Administra las empresas del sistema</p>
     </div>
-    <button class="btn-primary" routerLink="/companies/new">
+    <button class="btn-primary" routerLink="/companies/new" *ngIf="isMaster()">
       + Nueva Empresa
     </button>
   </div>
@@ -84,7 +84,7 @@
         <span class="users-count">{{ company.maxUsers }} usuarios máx.</span>
       </div>
 
-      <div class="company-actions">
+      <div class="company-actions" *ngIf="isMaster()">
         <button class="btn-action btn-link" (click)="openLinkModal(company)" title="Vincular Usuarios">
           👥 Vincular
         </button>
