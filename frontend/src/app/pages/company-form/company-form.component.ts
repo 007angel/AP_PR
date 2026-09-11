@@ -35,6 +35,8 @@ export class CompanyFormComponent implements OnInit {
   errorMessage = '';
   successMessage = '';
 
+  formErrors: { [key: string]: string } = {};
+
   plans = [
     { id: 'basic', name: 'Básico', users: 5, price: 'Gratis' },
     { id: 'professional', name: 'Profesional', users: 25, price: '$29/mes' },
@@ -72,11 +74,35 @@ export class CompanyFormComponent implements OnInit {
   }
 
   onSubmit() {
+    this.formErrors = {};
+    if (!this.validateForm()) {
+      return;
+    }
+
     if (this.isEditMode) {
       this.updateCompany();
     } else {
       this.createCompany();
     }
+  }
+
+  validateForm(): boolean {
+    let valid = true;
+    
+    if (!this.company.name) {
+      this.formErrors['name'] = 'El nombre de la empresa es requerido';
+      valid = false;
+    }
+    if (!this.company.rif) {
+      this.formErrors['rif'] = 'El RIF es requerido';
+      valid = false;
+    }
+    if (!this.company.email) {
+      this.formErrors['email'] = 'El correo electrónico es requerido';
+      valid = false;
+    }
+    
+    return valid;
   }
 
   createCompany() {

@@ -29,6 +29,8 @@ export class UserFormComponent implements OnInit {
   isSubmitting = false;
   errorMessage = '';
 
+  formErrors: { [key: string]: string } = {};
+
   availableModules = [
     { id: 'users', name: 'Gestión de Usuarios', icon: '👥', description: 'Administrar cuentas y permisos' },
     { id: 'dashboard', name: 'Dashboard', icon: '📊', description: 'Métricas y reportes en tiempo real' },
@@ -76,11 +78,35 @@ export class UserFormComponent implements OnInit {
   }
 
   onSubmit() {
+    this.formErrors = {};
+    if (!this.validateForm()) {
+      return;
+    }
+
     if (this.isEditMode) {
       this.updateUser();
     } else {
       this.createUser();
     }
+  }
+
+  validateForm(): boolean {
+    let valid = true;
+    
+    if (!this.user.name) {
+      this.formErrors['name'] = 'El nombre es requerido';
+      valid = false;
+    }
+    if (!this.user.email) {
+      this.formErrors['email'] = 'El correo electrónico es requerido';
+      valid = false;
+    }
+    if (!this.isEditMode && !this.user.password) {
+      this.formErrors['password'] = 'La contraseña es requerida';
+      valid = false;
+    }
+    
+    return valid;
   }
 
   createUser() {

@@ -202,6 +202,12 @@
     cursor: pointer;
     background: var(--bg-secondary);
   }
+
+  .field-error {
+    color: var(--danger-text);
+    font-size: 12px;
+    margin-top: 4px;
+  }
 }
 
 .plans-grid {

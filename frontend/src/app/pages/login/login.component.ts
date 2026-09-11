@@ -23,6 +23,8 @@ export class LoginComponent implements OnInit {
   errorType: '' | 'email' | 'password' = '';
   showExpiredMessage = false;
 
+  formErrors: { [key: string]: string } = {};
+
   constructor(
     private userService: UserService,
     private router: Router,
@@ -43,6 +45,11 @@ export class LoginComponent implements OnInit {
   }
 
   onSubmit() {
+    this.formErrors = {};
+    if (!this.validateForm()) {
+      return;
+    }
+
     this.isLoading = true;
     this.errorMessage = '';
     this.errorType = '';
@@ -88,5 +95,20 @@ export class LoginComponent implements OnInit {
 
   contactSales() {
     window.open('https://wa.me/525512345678?text=Hola,%20necesito%20información%20sobre%20TechSolutions', '_blank');
+  }
+
+  validateForm(): boolean {
+    let valid = true;
+    
+    if (!this.credentials.email) {
+      this.formErrors['email'] = 'El correo electrónico es requerido';
+      valid = false;
+    }
+    if (!this.credentials.password) {
+      this.formErrors['password'] = 'La contraseña es requerida';
+      valid = false;
+    }
+    
+    return valid;
   }
 }

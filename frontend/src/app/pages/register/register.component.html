@@ -92,18 +92,21 @@
             <label for="companyName">Nombre de la Empresa *</label>
             <input type="text" id="companyName" name="companyName" [(ngModel)]="company.name"
               placeholder="Ej: Mi Empresa C.A." required />
+            <span class="field-error" *ngIf="formErrors['companyName']">{{ formErrors['companyName'] }}</span>
           </div>
 
           <div class="form-group">
             <label for="rif">RIF *</label>
             <input type="text" id="rif" name="rif" [(ngModel)]="company.rif"
               placeholder="Ej: J-12345678-9" required />
+            <span class="field-error" *ngIf="formErrors['companyRif']">{{ formErrors['companyRif'] }}</span>
           </div>
 
           <div class="form-group">
             <label for="companyEmail">Email de la Empresa *</label>
             <input type="email" id="companyEmail" name="companyEmail" [(ngModel)]="company.email"
               placeholder="empresa@ejemplo.com" required />
+            <span class="field-error" *ngIf="formErrors['companyEmail']">{{ formErrors['companyEmail'] }}</span>
           </div>
 
           <div class="form-group">
@@ -128,12 +131,14 @@
             <label for="adminName">Nombre Completo *</label>
             <input type="text" id="adminName" name="adminName" [(ngModel)]="admin.name"
               placeholder="Tu nombre completo" required />
+            <span class="field-error" *ngIf="formErrors['adminName']">{{ formErrors['adminName'] }}</span>
           </div>
 
           <div class="form-group">
             <label for="adminEmail">Correo Electronico *</label>
             <input type="email" id="adminEmail" name="adminEmail" [(ngModel)]="admin.email"
               placeholder="tu@correo.com" required />
+            <span class="field-error" *ngIf="formErrors['adminEmail']">{{ formErrors['adminEmail'] }}</span>
           </div>
 
           <div class="form-row">
@@ -141,12 +146,14 @@
               <label for="password">Contrasena *</label>
               <input type="password" id="password" name="password" [(ngModel)]="admin.password"
                 placeholder="Minimo 8 caracteres" required />
+              <span class="field-error" *ngIf="formErrors['adminPassword']">{{ formErrors['adminPassword'] }}</span>
             </div>
 
             <div class="form-group">
               <label for="confirmPassword">Confirmar Contrasena *</label>
               <input type="password" id="confirmPassword" name="confirmPassword"
                 [(ngModel)]="admin.confirmPassword" placeholder="Repite tu contrasena" required />
+              <span class="field-error" *ngIf="formErrors['confirmPassword']">{{ formErrors['confirmPassword'] }}</span>
             </div>
           </div>
 
@@ -191,6 +198,7 @@
               <input type="checkbox" name="terms" [(ngModel)]="acceptTerms" />
               <span>Acepto los <a href="#">Terminos</a> y <a href="#">Politica de Privacidad</a></span>
             </label>
+            <span class="field-error" *ngIf="formErrors['terms']">{{ formErrors['terms'] }}</span>
           </div>
 
           <div class="step-buttons">

@@ -51,11 +51,13 @@ import { Ingreso } from '../../../models/ingreso.model';
                 <div class="form-group">
                   <label>Lote *</label>
                   <input type="text" [(ngModel)]="formData.lote" name="lote" required placeholder="Ej: LOTE-001">
+                  <span class="field-error" *ngIf="formErrors['lote']">{{ formErrors['lote'] }}</span>
                 </div>
 
                 <div class="form-group">
                   <label>Articulo *</label>
                   <input type="text" [(ngModel)]="formData.articulo" name="articulo" required placeholder="Nombre del articulo">
+                  <span class="field-error" *ngIf="formErrors['articulo']">{{ formErrors['articulo'] }}</span>
                 </div>
 
                 <div class="form-group">
@@ -66,16 +68,19 @@ import { Ingreso } from '../../../models/ingreso.model';
                 <div class="form-group">
                   <label>Caja *</label>
                   <input type="number" [(ngModel)]="formData.caja" name="caja" required min="0">
+                  <span class="field-error" *ngIf="formErrors['caja']">{{ formErrors['caja'] }}</span>
                 </div>
 
                 <div class="form-group">
                   <label>Unidad *</label>
                   <input type="number" [(ngModel)]="formData.unidad" name="unidad" required min="0">
+                  <span class="field-error" *ngIf="formErrors['unidad']">{{ formErrors['unidad'] }}</span>
                 </div>
 
                 <div class="form-group">
                   <label>Total Ingreso *</label>
                   <input type="number" [(ngModel)]="formData.totalIngreso" name="totalIngreso" required min="0" (ngModelChange)="calcularCostoIndividual()">
+                  <span class="field-error" *ngIf="formErrors['totalIngreso']">{{ formErrors['totalIngreso'] }}</span>
                 </div>
 
                 <div class="form-group">
@@ -436,6 +441,12 @@ import { Ingreso } from '../../../models/ingreso.model';
       display: flex;
       gap: 4px;
     }
+
+    .field-error {
+      color: var(--danger-text);
+      font-size: 12px;
+      margin-top: 4px;
+    }
   `]
 })
 export class IngresoDetalleFormComponent implements OnInit {
@@ -449,6 +460,8 @@ export class IngresoDetalleFormComponent implements OnInit {
   isLoading = true;
   isSaving = false;
   error: string | null = null;
+
+  formErrors: { [key: string]: string } = {};
 
   constructor(
     private route: ActivatedRoute,
@@ -515,6 +528,11 @@ export class IngresoDetalleFormComponent implements OnInit {
   }
 
   onSubmit() {
+    this.formErrors = {};
+    if (!this.validateForm()) {
+      return;
+    }
+
     this.isSaving = true;
 
     if (this.editingId) {
@@ -574,5 +592,32 @@ export class IngresoDetalleFormComponent implements OnInit {
     } else {
       this.formData.costoIndividual = 0;
     }
+  }
+
+  validateForm(): boolean {
+    let valid = true;
+    
+    if (!this.formData.lote) {
+      this.formErrors['lote'] = 'El lote es requerido';
+      valid = false;
+    }
+    if (!this.formData.articulo) {
+      this.formErrors['articulo'] = 'El articulo es requerido';
+      valid = false;
+    }
+    if (this.formData.caja < 0) {
+      this.formErrors['caja'] = 'La caja debe ser mayor o igual a 0';
+      valid = false;
+    }
+    if (this.formData.unidad < 0) {
+      this.formErrors['unidad'] = 'La unidad debe ser mayor o igual a 0';
+      valid = false;
+    }
+    if (!this.formData.totalIngreso || this.formData.totalIngreso <= 0) {
+      this.formErrors['totalIngreso'] = 'El total ingreso es requerido y debe ser mayor a 0';
+      valid = false;
+    }
+    
+    return valid;
   }
 }

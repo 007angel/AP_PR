@@ -16,6 +16,8 @@ export class RegisterComponent {
   isLoading = false;
   errorMessage = '';
 
+  formErrors: { [key: string]: string } = {};
+
   company = {
     name: '',
     rif: '',
@@ -42,9 +44,22 @@ export class RegisterComponent {
   ) {}
 
   nextStep() {
+    this.formErrors = {};
     if (this.currentStep === 1) {
-      if (!this.company.name || !this.company.rif || !this.company.email) {
-        this.errorMessage = 'Nombre, RIF y email de la empresa son requeridos';
+      let valid = true;
+      if (!this.company.name) {
+        this.formErrors['companyName'] = 'El nombre de la empresa es requerido';
+        valid = false;
+      }
+      if (!this.company.rif) {
+        this.formErrors['companyRif'] = 'El RIF es requerido';
+        valid = false;
+      }
+      if (!this.company.email) {
+        this.formErrors['companyEmail'] = 'El correo electrónico es requerido';
+        valid = false;
+      }
+      if (!valid) {
         return;
       }
     }
@@ -54,16 +69,35 @@ export class RegisterComponent {
 
   prevStep() {
     this.errorMessage = '';
+    this.formErrors = {};
     this.currentStep--;
   }
 
   onSubmit() {
+    this.formErrors = {};
+    let valid = true;
+
+    if (!this.admin.name) {
+      this.formErrors['adminName'] = 'El nombre es requerido';
+      valid = false;
+    }
+    if (!this.admin.email) {
+      this.formErrors['adminEmail'] = 'El correo electrónico es requerido';
+      valid = false;
+    }
+    if (!this.admin.password) {
+      this.formErrors['adminPassword'] = 'La contraseña es requerida';
+      valid = false;
+    }
     if (this.admin.password !== this.admin.confirmPassword) {
-      this.errorMessage = 'Las contrasenas no coinciden';
-      return;
+      this.formErrors['confirmPassword'] = 'Las contraseñas no coinciden';
+      valid = false;
     }
     if (!this.acceptTerms) {
-      this.errorMessage = 'Debes aceptar los terminos y condiciones';
+      this.formErrors['terms'] = 'Debes aceptar los términos y condiciones';
+      valid = false;
+    }
+    if (!valid) {
       return;
     }
 

@@ -67,7 +67,8 @@
             placeholder="ejemplo&#64;correo.com"
             required
           />
-          <span class="field-error" *ngIf="errorType === 'email'">Correo electrónico no registrado</span>
+          <span class="field-error" *ngIf="formErrors['email']">{{ formErrors['email'] }}</span>
+          <span class="field-error" *ngIf="errorType === 'email' && !formErrors['email']">Correo electrónico no registrado</span>
         </div>
 
         <div class="form-group" [ngClass]="{'input-error': errorType === 'password'}">
@@ -80,7 +81,8 @@
             placeholder="Ingresa tu contraseña"
             required
           />
-          <span class="field-error" *ngIf="errorType === 'password'">La contraseña que ingresaste es incorrecta</span>
+          <span class="field-error" *ngIf="formErrors['password']">{{ formErrors['password'] }}</span>
+          <span class="field-error" *ngIf="errorType === 'password' && !formErrors['password']">La contraseña que ingresaste es incorrecta</span>
         </div>
 
         <div class="form-options">

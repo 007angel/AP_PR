@@ -211,6 +211,12 @@
       }
     }
 
+    .field-error {
+      color: var(--danger-text);
+      font-size: 12px;
+      margin-top: 4px;
+    }
+
     &.terms {
       margin-top: 4px;
 
