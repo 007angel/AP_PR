@@ -31,12 +31,12 @@ import { RouterLink } from '@angular/router';
         <table class="data-table">
           <thead>
             <tr>
-              <th>ID</th>
-              <th>Fecha</th>
-              <th>Proveedor</th>
-              <th>Productos</th>
-              <th>Total</th>
-              <th>Estado</th>
+              <th>Correlativo</th>
+              <th>Factura</th>
+              <th>Fecha Ingreso</th>
+              <th>Fecha Digitacion</th>
+              <th>Tarimas</th>
+              <th>Usuario</th>
               <th>Acciones</th>
             </tr>
           </thead>
@@ -45,16 +45,12 @@ import { RouterLink } from '@angular/router';
               <td colspan="7" class="empty-row">No hay ingresos registrados</td>
             </tr>
             <tr *ngFor="let ingreso of ingresos">
-              <td>{{ ingreso.id }}</td>
-              <td>{{ ingreso.fecha | date:'dd/MM/yyyy' }}</td>
-              <td>{{ ingreso.proveedor }}</td>
-              <td>{{ ingreso.productos }}</td>
-              <td>{{ ingreso.total | currency }}</td>
-              <td>
-                <span class="status-badge" [class]="'status-' + ingreso.estado">
-                  {{ getEstadoLabel(ingreso.estado) }}
-                </span>
-              </td>
+              <td>{{ ingreso.correlativo }}</td>
+              <td>{{ ingreso.numeroFactura }}</td>
+              <td>{{ ingreso.fechaIngreso | date:'dd/MM/yyyy' }}</td>
+              <td>{{ ingreso.fechaDigitacion | date:'dd/MM/yyyy' }}</td>
+              <td>{{ ingreso.cantidadTarimas }}</td>
+              <td>{{ ingreso.usuarioDigito }}</td>
               <td>
                 <a [routerLink]="['/inventory/ingreso', ingreso.id]" class="btn-action">Ver Detalle</a>
               </td>
@@ -80,10 +76,6 @@ import { RouterLink } from '@angular/router';
     .data-table td { padding: 16px; font-size: 14px; color: var(--text-primary); border-bottom: 1px solid var(--border-primary); }
     .data-table tr:last-child td { border-bottom: none; }
     .empty-row { text-align: center; color: var(--text-tertiary); padding: 40px !important; }
-    .status-badge { padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 500; }
-    .status-pendiente { background: var(--warning-bg); color: var(--warning-text); }
-    .status-completado { background: var(--success-bg); color: var(--success-text); }
-    .status-cancelado { background: var(--danger-bg); color: var(--danger-text); }
     .btn-action { padding: 6px 12px; font-size: 12px; color: var(--accent-primary); background: var(--accent-bg); border: 1px solid var(--accent-border); border-radius: var(--radius-md); text-decoration: none; transition: var(--transition); }
     .btn-action:hover { background: var(--accent-primary); color: white; }
   `]
