@@ -25,6 +25,7 @@ const createIngresoSchema = Joi.object({
   observaciones:observaciones.optional(),
   status:status.optional(),
   valor_total:valorTotal.optional(),
+  valorTotal:valorTotal.optional(),
   companyId:companyId.optional(),
   userId:userId.optional()
 })
@@ -40,6 +41,7 @@ const updateIngresoSchema = Joi.object({
   observaciones:observaciones,
   status:status,
   valor_total:valorTotal,
+  valorTotal:valorTotal,
   companyId:companyId,
   userId:userId
 })

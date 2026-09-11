@@ -25,7 +25,7 @@ import { Ingreso } from '../../../models/ingreso.model';
             <h1>Detalle de Ingreso</h1>
           </div>
           <p *ngIf="ingreso" class="subtitle">
-            {{ ingreso.correlativo }} - {{ ingreso.numeroFactura }}
+            {{ ingreso.correlativo }} - {{ ingreso.numeroFactura }} | Tarimas: {{ ingreso.cantidadTarimas }} | Valor Total: {{ ingreso.valorTotal | number:'1.2-2' }}
           </p>
         </div>
       </div>
