@@ -1,6 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
+import { IngresoService } from '../../../services/ingreso.service';
+import { Ingreso } from '../../../models/ingreso.model';
 
 @Component({
   selector: 'app-inventory-dashboard',
@@ -15,121 +17,147 @@ import { RouterLink } from '@angular/router';
         </div>
       </div>
 
-      <div class="stats-grid">
-        <div class="stat-card stat-ingresos">
-          <div class="stat-icon">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M12 5v14M5 12h14"></path>
-            </svg>
-          </div>
-          <div class="stat-info">
-            <span class="stat-value">{{ totalIngresos }}</span>
-            <span class="stat-label">Total Ingresos</span>
-          </div>
-        </div>
-
-        <div class="stat-card stat-salidas">
-          <div class="stat-icon">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M12 19V5M5 12l7-7 7 7"></path>
-            </svg>
-          </div>
-          <div class="stat-info">
-            <span class="stat-value">{{ totalSalidas }}</span>
-            <span class="stat-label">Total Salidas</span>
-          </div>
-        </div>
-
-        <div class="stat-card stat-solicitudes">
-          <div class="stat-icon">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-              <polyline points="14 2 14 8 20 8"></polyline>
-            </svg>
-          </div>
-          <div class="stat-info">
-            <span class="stat-value">{{ totalSolicitudes }}</span>
-            <span class="stat-label">Solicitudes Pendientes</span>
-          </div>
-        </div>
-
-        <div class="stat-card stock">
-          <div class="stat-icon">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
-            </svg>
-          </div>
-          <div class="stat-info">
-            <span class="stat-value">{{ stockActual }}</span>
-            <span class="stat-label">Stock Actual</span>
-          </div>
-        </div>
+      <div *ngIf="isLoading" class="loading">
+        <div class="spinner"></div>
+        Cargando datos...
       </div>
 
-      <div class="content-grid">
-        <div class="card quick-actions">
-          <div class="card-header">
-            <h3>Acciones Rapidas</h3>
+      <div *ngIf="!isLoading">
+        <div class="stats-grid">
+          <div class="stat-card stat-ingresos">
+            <div class="stat-icon">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 5v14M5 12h14"></path>
+              </svg>
+            </div>
+            <div class="stat-info">
+              <span class="stat-value">{{ stats.total }}</span>
+              <span class="stat-label">Total Ingresos</span>
+            </div>
           </div>
-          <div class="card-body">
-            <a routerLink="/inventory/ingreso/new" class="action-btn">
-              <div class="action-icon">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M12 5v14M5 12h14"></path>
-                </svg>
-              </div>
-              <div class="action-text">
-                <strong>Nuevo Ingreso</strong>
-                <span>Registrar entrada de productos</span>
-              </div>
-            </a>
-            <a routerLink="/inventory/salida/new" class="action-btn">
-              <div class="action-icon">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M12 19V5M5 12l7-7 7 7"></path>
-                </svg>
-              </div>
-              <div class="action-text">
-                <strong>Nueva Salida</strong>
-                <span>Registrar salida de productos</span>
-              </div>
-            </a>
-            <a routerLink="/inventory/solicitudes/new" class="action-btn">
-              <div class="action-icon">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                  <polyline points="14 2 14 8 20 8"></polyline>
-                </svg>
-              </div>
-              <div class="action-text">
-                <strong>Nueva Solicitud</strong>
-                <span>Crear solicitud de productos</span>
-              </div>
-            </a>
-            <a routerLink="/inventory/reportes" class="action-btn">
-              <div class="action-icon">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <line x1="18" y1="20" x2="18" y2="10"></line>
-                  <line x1="12" y1="20" x2="12" y2="4"></line>
-                  <line x1="6" y1="20" x2="6" y2="14"></line>
-                </svg>
-              </div>
-              <div class="action-text">
-                <strong>Ver Reportes</strong>
-                <span>Consultar reportes del inventario</span>
-              </div>
-            </a>
+
+          <div class="stat-card stat-pendientes">
+            <div class="stat-icon">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"></circle>
+                <polyline points="12 6 12 12 16 14"></polyline>
+              </svg>
+            </div>
+            <div class="stat-info">
+              <span class="stat-value">{{ stats.pendientes }}</span>
+              <span class="stat-label">Pendientes</span>
+            </div>
+          </div>
+
+          <div class="stat-card stat-completados">
+            <div class="stat-icon">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                <polyline points="22 4 12 14.01 9 11.01"></polyline>
+              </svg>
+            </div>
+            <div class="stat-info">
+              <span class="stat-value">{{ stats.completados }}</span>
+              <span class="stat-label">Completados</span>
+            </div>
+          </div>
+
+          <div class="stat-card stat-cancelados">
+            <div class="stat-icon">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="15" y1="9" x2="9" y2="15"></line>
+                <line x1="9" y1="9" x2="15" y2="15"></line>
+              </svg>
+            </div>
+            <div class="stat-info">
+              <span class="stat-value">{{ stats.cancelados }}</span>
+              <span class="stat-label">Cancelados</span>
+            </div>
+          </div>
+
+          <div class="stat-card stat-tarimas">
+            <div class="stat-icon">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+              </svg>
+            </div>
+            <div class="stat-info">
+              <span class="stat-value">{{ stats.totalTarimas }}</span>
+              <span class="stat-label">Total Tarimas</span>
+            </div>
           </div>
         </div>
 
-        <div class="card recent-movements">
-          <div class="card-header">
-            <h3>Movimientos Recientes</h3>
-            <a routerLink="/inventory/reportes/movimientos" class="view-all">Ver todos</a>
+        <div class="content-grid">
+          <div class="card quick-actions">
+            <div class="card-header">
+              <h3>Acciones Rapidas</h3>
+            </div>
+            <div class="card-body">
+              <a routerLink="/inventory/ingreso/new" class="action-btn">
+                <div class="action-icon">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 5v14M5 12h14"></path>
+                  </svg>
+                </div>
+                <div class="action-text">
+                  <strong>Nuevo Ingreso</strong>
+                  <span>Registrar entrada de productos</span>
+                </div>
+              </a>
+              <a routerLink="/inventory/ingreso" class="action-btn">
+                <div class="action-icon">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                    <line x1="3" y1="9" x2="21" y2="9"></line>
+                    <line x1="9" y1="21" x2="9" y2="9"></line>
+                  </svg>
+                </div>
+                <div class="action-text">
+                  <strong>Ver Ingresos</strong>
+                  <span>Lista de todos los ingresos</span>
+                </div>
+              </a>
+              <a routerLink="/inventory/reportes/ingresos" class="action-btn">
+                <div class="action-icon">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="18" y1="20" x2="18" y2="10"></line>
+                    <line x1="12" y1="20" x2="12" y2="4"></line>
+                    <line x1="6" y1="20" x2="6" y2="14"></line>
+                  </svg>
+                </div>
+                <div class="action-text">
+                  <strong>Reportes</strong>
+                  <span>Ver reportes de ingresos</span>
+                </div>
+              </a>
+            </div>
           </div>
-          <div class="card-body">
-            <div class="empty-state">
-              <p>No hay movimientos recientes</p>
+
+          <div class="card recent-movements">
+            <div class="card-header">
+              <h3>Ingresos Recientes</h3>
+              <a routerLink="/inventory/ingreso" class="view-all">Ver todos</a>
+            </div>
+            <div class="card-body">
+              <div *ngIf="recentIngresos.length === 0" class="empty-state">
+                <p>No hay ingresos recientes</p>
+              </div>
+              <div *ngIf="recentIngresos.length > 0" class="ingresos-list">
+                <div *ngFor="let ingreso of recentIngresos" class="ingreso-item">
+                  <div class="ingreso-info">
+                    <span class="ingreso-correlativo">{{ ingreso.correlativo }}</span>
+                    <span class="ingreso-factura">{{ ingreso.numeroFactura }}</span>
+                  </div>
+                  <div class="ingreso-meta">
+                    <span class="ingreso-tarimas">{{ ingreso.cantidadTarimas }} tarimas</span>
+                    <span class="status-badge" [class]="'status-' + ingreso.status">
+                      {{ getEstadoLabel(ingreso.status || 'pendiente') }}
+                    </span>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -160,9 +188,32 @@ import { RouterLink } from '@angular/router';
       }
     }
 
+    .loading {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 60px;
+      color: var(--text-tertiary);
+
+      .spinner {
+        width: 40px;
+        height: 40px;
+        border: 3px solid var(--border-primary);
+        border-top-color: var(--accent-primary);
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        margin-bottom: 16px;
+      }
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
     .stats-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
       gap: 20px;
       margin-bottom: 32px;
     }
@@ -208,23 +259,28 @@ import { RouterLink } from '@angular/router';
       }
 
       &.stat-ingresos .stat-icon {
-        background: var(--success-bg);
-        color: var(--success-text);
+        background: var(--accent-bg);
+        color: var(--accent-primary);
       }
 
-      &.stat-salidas .stat-icon {
-        background: var(--danger-bg);
-        color: var(--danger-text);
-      }
-
-      &.stat-solicitudes .stat-icon {
+      &.stat-pendientes .stat-icon {
         background: var(--warning-bg);
         color: var(--warning-text);
       }
 
-      &.stock .stat-icon {
-        background: var(--accent-bg);
-        color: var(--accent-primary);
+      &.stat-completados .stat-icon {
+        background: var(--success-bg);
+        color: var(--success-text);
+      }
+
+      &.stat-cancelados .stat-icon {
+        background: var(--danger-bg);
+        color: var(--danger-text);
+      }
+
+      &.stat-tarimas .stat-icon {
+        background: var(--bg-tertiary);
+        color: var(--text-primary);
       }
     }
 
@@ -332,6 +388,72 @@ import { RouterLink } from '@angular/router';
       }
     }
 
+    .ingresos-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .ingreso-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 14px;
+      background: var(--bg-tertiary);
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-primary);
+
+      .ingreso-info {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+
+        .ingreso-correlativo {
+          font-size: 14px;
+          font-weight: 600;
+          color: var(--text-primary);
+        }
+
+        .ingreso-factura {
+          font-size: 12px;
+          color: var(--text-tertiary);
+        }
+      }
+
+      .ingreso-meta {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+
+        .ingreso-tarimas {
+          font-size: 12px;
+          color: var(--text-secondary);
+        }
+      }
+    }
+
+    .status-badge {
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 500;
+    }
+
+    .status-pendiente {
+      background: var(--warning-bg);
+      color: var(--warning-text);
+    }
+
+    .status-completado {
+      background: var(--success-bg);
+      color: var(--success-text);
+    }
+
+    .status-cancelado {
+      background: var(--danger-bg);
+      color: var(--danger-text);
+    }
+
     @media (max-width: 768px) {
       .content-grid {
         grid-template-columns: 1fr;
@@ -340,23 +462,49 @@ import { RouterLink } from '@angular/router';
   `]
 })
 export class InventoryDashboardComponent implements OnInit {
-  totalIngresos = 0;
-  totalSalidas = 0;
-  totalSolicitudes = 0;
-  stockActual = 0;
+  stats = {
+    total: 0,
+    pendientes: 0,
+    completados: 0,
+    cancelados: 0,
+    totalTarimas: 0
+  };
+  
+  recentIngresos: Ingreso[] = [];
+  isLoading = true;
 
-  constructor() {}
+  constructor(private ingresoService: IngresoService) {}
 
   ngOnInit() {
-    // TODO: Load inventory data from API
     this.loadStats();
   }
 
   loadStats() {
-    // Placeholder - will connect to backend
-    this.totalIngresos = 0;
-    this.totalSalidas = 0;
-    this.totalSolicitudes = 0;
-    this.stockActual = 0;
+    this.ingresoService.getStats().subscribe({
+      next: (stats) => {
+        this.stats = stats;
+        this.loadRecentIngresos();
+      },
+      error: () => {
+        this.isLoading = false;
+      }
+    });
+  }
+
+  loadRecentIngresos() {
+    this.ingresoService.getRecent(5).subscribe({
+      next: (ingresos) => {
+        this.recentIngresos = ingresos;
+        this.isLoading = false;
+      },
+      error: () => {
+        this.isLoading = false;
+      }
+    });
+  }
+
+  getEstadoLabel(estado: string): string {
+    const labels: any = { pendiente: 'Pendiente', completado: 'Completado', cancelado: 'Cancelado' };
+    return labels[estado] || estado;
   }
 }

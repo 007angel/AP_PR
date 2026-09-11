@@ -17,6 +17,29 @@ async(req, res, next)=>{
 }
 )
 
+router.get('/stats',
+async(req, res, next)=>{
+  try{
+    const stats = await service.getStats();
+    res.json(stats)
+  }catch(error){
+    next(error)
+  }
+}
+)
+
+router.get('/recent',
+async(req, res, next)=>{
+  try{
+    const limit = parseInt(req.query.limit) || 5;
+    const ingresos = await service.findRecent(limit);
+    res.json(ingresos)
+  }catch(error){
+    next(error)
+  }
+}
+)
+
 router.get('/correlativo/:companyId',
 async(req, res, next)=>{
   try{

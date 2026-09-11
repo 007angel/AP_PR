@@ -34,4 +34,12 @@ export class IngresoService {
   getCorrelativo(companyId: number): Observable<{ correlativo: string }> {
     return this.http.get<{ correlativo: string }>(`${this.apiUrl}/correlativo/${companyId}`);
   }
+
+  getStats(): Observable<{ total: number; pendientes: number; completados: number; cancelados: number; totalTarimas: number }> {
+    return this.http.get<{ total: number; pendientes: number; completados: number; cancelados: number; totalTarimas: number }>(`${this.apiUrl}/stats`);
+  }
+
+  getRecent(limit: number = 5): Observable<Ingreso[]> {
+    return this.http.get<Ingreso[]>(`${this.apiUrl}/recent?limit=${limit}`);
+  }
 }

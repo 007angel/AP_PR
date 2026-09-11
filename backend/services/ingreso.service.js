@@ -16,6 +16,15 @@ class IngresoTrService{
         return ingresos
     }
 
+    async findRecent(limit = 5){
+        const ingresos = await sequelize.models.IngresoTr.findAll({ 
+            order: [['id', 'DESC']],
+            limit: limit,
+            raw: true
+        })
+        return ingresos
+    }
+
     async findOne(id){
         const ingreso = await sequelize.models.IngresoTr.findByPk(id, { raw: true })
         return ingreso
@@ -50,6 +59,29 @@ class IngresoTrService{
 
     async generateCorrelativo(companyId){
         return await this.correlativoService.generateCorrelativo(companyId, 'ingreso', 'ING')
+    }
+
+    async getStats(){
+        const total = await sequelize.models.IngresoTr.count()
+        const pendientes = await sequelize.models.IngresoTr.count({ where: { status: 'pendiente' } })
+        const completados = await sequelize.models.IngresoTr.count({ where: { status: 'completado' } })
+        const cancelados = await sequelize.models.IngresoTr.count({ where: { status: 'cancelado' } })
+        
+        const result = await sequelize.models.IngresoTr.findAll({
+            attributes: [
+                [sequelize.fn('SUM', sequelize.col('cantidad_tarimas')), 'totalTarimas']
+            ],
+            raw: true
+        })
+        const totalTarimas = result[0]?.totalTarimas || 0
+
+        return {
+            total,
+            pendientes,
+            completados,
+            cancelados,
+            totalTarimas: parseInt(totalTarimas)
+        }
     }
 }
 
