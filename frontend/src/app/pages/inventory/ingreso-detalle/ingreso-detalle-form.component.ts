@@ -75,7 +75,7 @@ import { Ingreso } from '../../../models/ingreso.model';
 
                 <div class="form-group">
                   <label>Total Ingreso *</label>
-                  <input type="number" [(ngModel)]="formData.totalIngreso" name="totalIngreso" required min="0">
+                  <input type="number" [(ngModel)]="formData.totalIngreso" name="totalIngreso" required min="0" (ngModelChange)="calcularCostoIndividual()">
                 </div>
 
                 <div class="form-group">
