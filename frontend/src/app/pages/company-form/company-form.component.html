@@ -4,7 +4,12 @@
       <h1>{{ isEditMode ? 'Editar Empresa' : 'Registrar Empresa' }}</h1>
       <p>{{ isEditMode ? 'Actualiza los datos de la empresa' : 'Registra una nueva empresa en el sistema' }}</p>
     </div>
-    <a routerLink="/companies" class="btn-back">← Volver</a>
+    <div class="header-actions">
+      <a routerLink="/dashboard" class="btn-back">
+        ← Menú Principal
+      </a>
+      <a routerLink="/companies" class="btn-secondary">Volver a empresas</a>
+    </div>
   </div>
 
   <div *ngIf="isLoading" class="loading">Cargando datos...</div>

@@ -4,13 +4,18 @@
       <h1>Gestion de Usuarios</h1>
       <p>Administra los usuarios del sistema</p>
     </div>
-    <button class="btn-primary" routerLink="/users/new">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <line x1="12" y1="5" x2="12" y2="19"></line>
-        <line x1="5" y1="12" x2="19" y2="12"></line>
-      </svg>
-      Nuevo Usuario
-    </button>
+    <div class="header-actions">
+      <a routerLink="/dashboard" class="btn-back">
+        ← Menú Principal
+      </a>
+      <button class="btn-primary" routerLink="/users/new">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="12" y1="5" x2="12" y2="19"></line>
+          <line x1="5" y1="12" x2="19" y2="12"></line>
+        </svg>
+        Nuevo Usuario
+      </button>
+    </div>
   </div>
 
   <div class="success-message" *ngIf="successMessage">

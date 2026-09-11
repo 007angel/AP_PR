@@ -5,6 +5,9 @@
 }
 
 .page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
   margin-bottom: 32px;
 
   .back-link {
@@ -32,6 +35,34 @@
       font-size: 14px;
       color: var(--text-tertiary);
       margin: 0;
+    }
+  }
+
+  .header-actions {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+  }
+
+  .btn-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 20px;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border-primary);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: var(--transition);
+    text-decoration: none;
+
+    &:hover {
+      background: var(--bg-hover);
+      color: var(--text-primary);
+      border-color: var(--accent-primary);
     }
   }
 }

@@ -5,6 +5,11 @@
       <h1>{{ isEditMode ? 'Editar Usuario' : 'Crear Usuario' }}</h1>
       <p>{{ isEditMode ? 'Actualiza la información del usuario' : 'Completa los datos para crear un nuevo usuario' }}</p>
     </div>
+    <div class="header-actions">
+      <a routerLink="/dashboard" class="btn-back">
+        ← Menú Principal
+      </a>
+    </div>
   </div>
 
   <div *ngIf="isLoading" class="loading">
