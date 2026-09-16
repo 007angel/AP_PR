@@ -7,6 +7,9 @@ import { UserListComponent } from './pages/user-list/user-list.component';
 import { UserFormComponent } from './pages/user-form/user-form.component';
 import { CompanyListComponent } from './pages/company-list/company-list.component';
 import { CompanyFormComponent } from './pages/company-form/company-form.component';
+import { ModuloListComponent } from './pages/modulo-list/modulo-list.component';
+import { ModuloFormComponent } from './pages/modulo-form/modulo-form.component';
+import { AnulacionListComponent } from './pages/anulacion-list/anulacion-list.component';
 import { AuthGuard } from './guards/auth.guard';
 import { RoleGuard } from './guards/role.guard';
 
@@ -24,6 +27,8 @@ import { SolicitudesDetailComponent } from './pages/inventory/solicitudes/solici
 import { ReporteMovimientosComponent } from './pages/inventory/reportes/reporte-movimientos.component';
 import { ReporteIngresosComponent } from './pages/inventory/reportes/reporte-ingresos.component';
 import { ReporteSalidasComponent } from './pages/inventory/reportes/reporte-salidas.component';
+import { ClienteListComponent } from './pages/inventory/clientes/cliente-list.component';
+import { ArticuloListComponent } from './pages/inventory/articulos/articulo-list.component';
 
 export const routes: Routes = [
   { path: '', component: SolutionsComponent },
@@ -36,6 +41,10 @@ export const routes: Routes = [
   { path: 'companies', component: CompanyListComponent, canActivate: [AuthGuard, RoleGuard], data: { roles: ['master', 'admin'] } },
   { path: 'companies/new', component: CompanyFormComponent, canActivate: [AuthGuard, RoleGuard], data: { roles: ['master', 'admin'] } },
   { path: 'companies/edit/:id', component: CompanyFormComponent, canActivate: [AuthGuard, RoleGuard], data: { roles: ['master', 'admin'] } },
+  { path: 'modulos', component: ModuloListComponent, canActivate: [AuthGuard, RoleGuard], data: { roles: ['master', 'admin'] } },
+  { path: 'modulos/new', component: ModuloFormComponent, canActivate: [AuthGuard, RoleGuard], data: { roles: ['master', 'admin'] } },
+  { path: 'modulos/edit/:id', component: ModuloFormComponent, canActivate: [AuthGuard, RoleGuard], data: { roles: ['master', 'admin'] } },
+  { path: 'anulaciones', component: AnulacionListComponent, canActivate: [AuthGuard, RoleGuard], data: { roles: ['master'] } },
   
   // Inventory routes
   {
@@ -57,6 +66,8 @@ export const routes: Routes = [
       { path: 'solicitudes', component: SolicitudesListComponent },
       { path: 'solicitudes/new', component: SolicitudesDetailComponent },
       { path: 'solicitudes/:id', component: SolicitudesDetailComponent },
+      { path: 'clientes', component: ClienteListComponent },
+      { path: 'articulos', component: ArticuloListComponent },
       { path: 'reportes', redirectTo: 'reportes/movimientos', pathMatch: 'full' },
       { path: 'reportes/movimientos', component: ReporteMovimientosComponent },
       { path: 'reportes/ingresos', component: ReporteIngresosComponent },

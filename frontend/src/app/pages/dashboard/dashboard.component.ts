@@ -274,8 +274,16 @@ export class DashboardComponent implements OnInit {
 
     const userToCreate = { ...this.newUser };
     const companyId = this.authService.getCompanyId();
+    const creatorId = this.authService.getUser()?.id || null;
     if (this.authService.isAdmin() && companyId) {
       userToCreate.companyId = companyId;
+    }
+    if (companyId) {
+      userToCreate.createdByCompanyId = companyId;
+      userToCreate.idEmpresaMaster = companyId;
+    }
+    if (creatorId) {
+      userToCreate.idUsuarioMaster = creatorId;
     }
 
     this.userService.create(userToCreate).subscribe({

@@ -8,7 +8,7 @@ export interface Ingreso {
   usuarioDigito: string;
   proveedor?: string;
   observaciones?: string;
-  status?: 'pendiente' | 'completado' | 'cancelado';
+  status?: 'pendiente' | 'completado' | 'cancelado' | 'anulado';
   valorTotal?: number;
   companyId?: number;
   userId?: number;

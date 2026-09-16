@@ -1,6 +1,6 @@
 const express = require('express');
 const userService = require('../services/user.service');
-const validatorHandleer = require('../middlewares/validator.handler');
+const validatorHandler = require('../middlewares/validator.handler');
 const { getUserSchema, createUserSchema, updateUserSchema, resetPasswordSchema } = require('../schemas/user.schema');
 
 const router = express.Router();
@@ -35,6 +35,18 @@ async(req, res, next)=>{
 }
 )
 
+router.get('/creados-por-empresa/:empresaId',
+async(req, res, next)=>{
+  try{
+    const { empresaId } = req.params
+    const count = await service.countByEmpresaMaster(parseInt(empresaId))
+    res.json({ count })
+  }catch(error){
+    next(error)
+  }
+}
+)
+
 router.get('/count-by-company/:companyId',
 async(req, res, next)=>{
   try{
@@ -47,7 +59,7 @@ async(req, res, next)=>{
 }
 )
 
-router.get('/:id',validatorHandleer(getUserSchema,'params'),
+router.get('/:id',validatorHandler(getUserSchema,'params'),
 async(req, res, next)=>{
   try{
     const{ id }= req.params;
@@ -64,7 +76,7 @@ async(req, res, next)=>{
 )
 
 router.post('/',
-validatorHandleer(createUserSchema,'body'),
+validatorHandler(createUserSchema,'body'),
 async(req, res, next)=>{
   try{
     const body = req.body;
@@ -100,7 +112,7 @@ async(req, res, next)=>{
 )
 
 router.post('/reset-password',
-validatorHandleer(resetPasswordSchema,'body'),
+validatorHandler(resetPasswordSchema,'body'),
 async(req, res, next)=>{
   try{
     const { email } = req.body;
@@ -116,8 +128,8 @@ async(req, res, next)=>{
 )
 
 router.put('/:id',
-  validatorHandleer(getUserSchema,'params'),
-  validatorHandleer(updateUserSchema,'body'),
+  validatorHandler(getUserSchema,'params'),
+  validatorHandler(updateUserSchema,'body'),
 async(req, res, next)=>{
   try{
     const { id } = req.params;
@@ -135,7 +147,7 @@ async(req, res, next)=>{
 )
 
 router.put('/:id/modules',
-  validatorHandleer(getUserSchema,'params'),
+  validatorHandler(getUserSchema,'params'),
 async(req, res, next)=>{
   try{
     const { id } = req.params;
@@ -153,7 +165,7 @@ async(req, res, next)=>{
 )
 
 router.delete('/:id',
-  validatorHandleer(getUserSchema,'params'),
+  validatorHandler(getUserSchema,'params'),
 async(req, res, next)=>{
   try{
     const { id } = req.params;

@@ -23,6 +23,10 @@ export class UserService {
     return this.http.get<{ count: number }>(`${this.apiUrl}/count-by-company/${companyId}`);
   }
 
+  countByEmpresaMaster(empresaId: number): Observable<{ count: number }> {
+    return this.http.get<{ count: number }>(`${this.apiUrl}/creados-por-empresa/${empresaId}`);
+  }
+
   findOne(id: number): Observable<User> {
     return this.http.get<User>(`${this.apiUrl}/${id}`);
   }

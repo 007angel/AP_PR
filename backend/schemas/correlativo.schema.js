@@ -1,26 +1,29 @@
 const Joi = require('joi');
 
 const id = Joi.number().integer();
+const codEmpresa = Joi.number().integer();
 const companyId = Joi.number().integer();
-const tipo = Joi.string().valid('ingreso', 'factura', 'salida', 'solicitud');
-const prefijo = Joi.string().min(2).max(10);
-const ultimoNumero = Joi.number().integer().min(0);
+const tipo = Joi.string().valid('ing', 'fac', 'sal', 'sol', 'ingreso', 'factura', 'salida', 'solicitud');
+const numero = Joi.number().integer().min(0);
 const descripcion = Joi.string().max(100).allow('', null);
+const fecha = Joi.date();
 
 const createCorrelativoSchema = Joi.object({
-  companyId:companyId.required(),
+  codEmpresa:codEmpresa.optional(),
+  companyId:companyId.optional(),
   tipo:tipo.required(),
-  prefijo:prefijo.required(),
-  ultimoNumero:ultimoNumero.optional(),
-  descripcion:descripcion.optional()
+  numero:numero.optional(),
+  descripcion:descripcion.optional(),
+  fecha:fecha.optional()
 })
 
 const updateCorrelativoSchema = Joi.object({
+  codEmpresa:codEmpresa,
   companyId:companyId,
   tipo:tipo,
-  prefijo:prefijo,
-  ultimoNumero:ultimoNumero,
-  descripcion:descripcion
+  numero:numero,
+  descripcion:descripcion,
+  fecha:fecha
 })
 
 const getCorrelativoSchema = Joi.object({

@@ -3,6 +3,7 @@ const { Model, DataTypes } = require('sequelize');
 class IngresoDetalleTr extends Model {
   static associate(models) {
     this.belongsTo(models.IngresoTr, { foreignKey: 'ingreso_id', as: 'ingreso' });
+    this.belongsTo(models.ArticuloTr, { foreignKey: 'articuloId', as: 'articuloRef' });
   }
 
   static config(sequelize) {
@@ -17,7 +18,7 @@ class IngresoDetalleTr extends Model {
   }
 }
 
-const schema = {
+const IngresoDetalleTrSchema = {
   id: {
     allowNull: false,
     autoIncrement: true,
@@ -87,6 +88,38 @@ const schema = {
     defaultValue: 0,
     field: 'costo_individual'
   },
+  foto: {
+    allowNull: true,
+    type: DataTypes.TEXT,
+    comment: 'Foto del articulo en base64 o URL'
+  },
+  articuloId: {
+    allowNull: true,
+    type: DataTypes.INTEGER,
+    field: 'articulo_id',
+    references: {
+      model: 'articulo_tr',
+      key: 'id'
+    }
+  },
+  companyId: {
+    allowNull: true,
+    type: DataTypes.INTEGER,
+    field: 'company_id',
+    references: {
+      model: 'company_tr',
+      key: 'id'
+    }
+  },
+  userId: {
+    allowNull: true,
+    type: DataTypes.INTEGER,
+    field: 'user_id',
+    references: {
+      model: 'user_tr',
+      key: 'id'
+    }
+  },
   created_at: {
     allowNull: false,
     type: DataTypes.DATE,
@@ -99,4 +132,4 @@ const schema = {
   }
 };
 
-module.exports = { IngresoDetalleTr, schema };
+module.exports = { IngresoDetalleTr, IngresoDetalleTrSchema };

@@ -3,6 +3,14 @@ const {CompanyTr, CompanyTrSchema} = require('./company.model')
 const {IngresoTr, IngresoTrSchema} = require('./ingreso.model')
 const {CorrelativoTr, CorrelativoTrSchema} = require('./correlativo.model')
 const {IngresoDetalleTr, IngresoDetalleTrSchema} = require('./ingreso-detalle.model')
+const {ModuloTr, ModuloTrSchema} = require('./modulo.model')
+const {AnulacionTr, AnulacionTrSchema} = require('./anulacion.model')
+const {ChatKnowledgeTr, ChatKnowledgeTrSchema} = require('./chat-knowledge.model')
+const {ChatMessageTr, ChatMessageTrSchema} = require('./chat-message.model')
+const {SolicitudTr, SolicitudTrSchema} = require('./solicitud.model')
+const {SolicitudDetalleTr, SolicitudDetalleTrSchema} = require('./solicitud-detalle.model')
+const {ClienteTr, ClienteTrSchema} = require('./cliente.model')
+const {ArticuloTr, ArticuloTrSchema} = require('./articulo.model')
 
 function setupModels(sequelize){
   UserTr.init(UserTrSchema,UserTr.config(sequelize))
@@ -10,6 +18,14 @@ function setupModels(sequelize){
   IngresoTr.init(IngresoTrSchema,IngresoTr.config(sequelize))
   CorrelativoTr.init(CorrelativoTrSchema,CorrelativoTr.config(sequelize))
   IngresoDetalleTr.init(IngresoDetalleTrSchema,IngresoDetalleTr.config(sequelize))
+  ModuloTr.init(ModuloTrSchema,ModuloTr.config(sequelize))
+  AnulacionTr.init(AnulacionTrSchema,AnulacionTr.config(sequelize))
+  ChatKnowledgeTr.init(ChatKnowledgeTrSchema,ChatKnowledgeTr.config(sequelize))
+  ChatMessageTr.init(ChatMessageTrSchema,ChatMessageTr.config(sequelize))
+  SolicitudTr.init(SolicitudTrSchema,SolicitudTr.config(sequelize))
+  SolicitudDetalleTr.init(SolicitudDetalleTrSchema,SolicitudDetalleTr.config(sequelize))
+  ClienteTr.init(ClienteTrSchema,ClienteTr.config(sequelize))
+  ArticuloTr.init(ArticuloTrSchema,ArticuloTr.config(sequelize))
 
   // Associations
   UserTr.associate(sequelize.models)
@@ -17,6 +33,14 @@ function setupModels(sequelize){
   IngresoTr.associate(sequelize.models)
   CorrelativoTr.associate(sequelize.models)
   IngresoDetalleTr.associate(sequelize.models)
+  ModuloTr.associate(sequelize.models)
+  AnulacionTr.associate(sequelize.models)
+  ChatKnowledgeTr.associate(sequelize.models)
+  ChatMessageTr.associate(sequelize.models)
+  SolicitudTr.associate(sequelize.models)
+  SolicitudDetalleTr.associate(sequelize.models)
+  ClienteTr.associate(sequelize.models)
+  ArticuloTr.associate(sequelize.models)
 }
 
 module.exports= setupModels;

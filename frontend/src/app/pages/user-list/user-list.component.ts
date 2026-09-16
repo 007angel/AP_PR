@@ -7,11 +7,13 @@ import { CompanyService } from '../../services/company.service';
 import { AuthService } from '../../services/auth.service';
 import { User } from '../../models/user.model';
 import { Company } from '../../models/company.model';
+import { ConfirmDialogComponent } from '../../shared/confirm-dialog/confirm-dialog.component';
+import { ConfirmService } from '../../shared/confirm-dialog/confirm.service';
 
 @Component({
   selector: 'app-user-list',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink],
+  imports: [CommonModule, FormsModule, RouterLink, ConfirmDialogComponent],
   templateUrl: './user-list.component.html',
   styleUrls: ['./user-list.component.scss']
 })
@@ -55,11 +57,21 @@ export class UserListComponent implements OnInit {
   constructor(
     private userService: UserService,
     private companyService: CompanyService,
-    public authService: AuthService
+    public authService: AuthService,
+    private confirmService: ConfirmService
   ) {}
 
   ngOnInit() {
     this.loadUsers();
+    this.loadCompanies();
+  }
+
+  getCreatorName(user: User): string {
+    const empresaId = user.idEmpresaMaster ?? user.createdByCompanyId;
+    if (!empresaId) {
+      return 'Sistema';
+    }
+    return this.getCompanyName(empresaId);
   }
 
   loadUsers() {
@@ -98,7 +110,8 @@ export class UserListComponent implements OnInit {
   filterUsers() {
     this.filteredUsers = this.users.filter(user => {
       const matchesSearch = user.name.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
-                           user.email.toLowerCase().includes(this.searchTerm.toLowerCase());
+                            user.email.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
+                            (user.codigo || '').toLowerCase().includes(this.searchTerm.toLowerCase());
       const matchesRole = this.filterRole === 'all' || user.role === this.filterRole;
       const matchesStatus = this.filterStatus === 'all' || user.status === this.filterStatus;
       return matchesSearch && matchesRole && matchesStatus;
@@ -149,7 +162,16 @@ export class UserListComponent implements OnInit {
     const count = this.selectedUsers.size;
     if (count === 0) return;
 
-    if (confirm(`¿Estás seguro de activar ${count} usuario(s)?`)) {
+    this.confirmService.confirm({
+      title: 'Activar usuarios',
+      message: `¿Estás seguro de activar ${count} usuario(s)?`,
+      confirmText: 'Si, activar',
+      cancelText: 'Cancelar',
+      danger: false
+    }).subscribe(ok => {
+      if (!ok) {
+        return;
+      }
       const ids = Array.from(this.selectedUsers);
       let completed = 0;
 
@@ -178,14 +200,22 @@ export class UserListComponent implements OnInit {
           }
         });
       });
-    }
+    });
   }
 
   bulkDeactivate() {
     const count = this.selectedUsers.size;
     if (count === 0) return;
 
-    if (confirm(`¿Estás seguro de desactivar ${count} usuario(s)?`)) {
+    this.confirmService.confirm({
+      title: 'Desactivar usuarios',
+      message: `¿Estás seguro de desactivar ${count} usuario(s)?`,
+      confirmText: 'Si, desactivar',
+      cancelText: 'Cancelar'
+    }).subscribe(ok => {
+      if (!ok) {
+        return;
+      }
       const ids = Array.from(this.selectedUsers);
       let completed = 0;
 
@@ -214,7 +244,7 @@ export class UserListComponent implements OnInit {
           }
         });
       });
-    }
+    });
   }
 
   calculateDaysSince(date: string): number {
@@ -412,7 +442,16 @@ export class UserListComponent implements OnInit {
     const newStatus = user.status === 'active' ? 'inactive' : 'active';
     const action = newStatus === 'active' ? 'activar' : 'desactivar';
 
-    if (confirm(`¿Estás seguro de ${action} a ${user.name}?`)) {
+    this.confirmService.confirm({
+      title: `${action === 'activar' ? 'Activar' : 'Desactivar'} usuario`,
+      message: `¿Estás seguro de ${action} a ${user.name}?`,
+      confirmText: `Si, ${action}`,
+      cancelText: 'Cancelar',
+      danger: action !== 'activar'
+    }).subscribe(ok => {
+      if (!ok) {
+        return;
+      }
       this.userService.update(user.id!, { status: newStatus as any }).subscribe({
         next: (updated) => {
           const index = this.users.findIndex(u => u.id === updated.id);
@@ -428,11 +467,19 @@ export class UserListComponent implements OnInit {
           setTimeout(() => this.errorMessage = '', 3000);
         }
       });
-    }
+    });
   }
 
   deleteUser(id: number) {
-    if (confirm('¿Estás seguro de eliminar este usuario?')) {
+    this.confirmService.confirm({
+      title: 'Eliminar usuario',
+      message: '¿Estás seguro de eliminar este usuario? Esta acción no se puede deshacer.',
+      confirmText: 'Si, eliminar',
+      cancelText: 'Cancelar'
+    }).subscribe(ok => {
+      if (!ok) {
+        return;
+      }
       this.userService.delete(id).subscribe({
         next: () => {
           this.users = this.users.filter(u => u.id !== id);
@@ -446,6 +493,6 @@ export class UserListComponent implements OnInit {
           setTimeout(() => this.errorMessage = '', 3000);
         }
       });
-    }
+    });
   }
 }

@@ -65,7 +65,8 @@ export class UserFormComponent implements OnInit {
           email: data.email,
           role: data.role || 'user',
           modules: data.modules || [],
-          status: data.status
+          status: data.status,
+          codigo: data.codigo || ''
         };
         this.isLoading = false;
       },
@@ -111,7 +112,20 @@ export class UserFormComponent implements OnInit {
 
   createUser() {
     this.isSubmitting = true;
-    this.userService.create(this.user).subscribe({
+    const payload: User = { ...this.user };
+    const companyId = this.authService.getCompanyId();
+    const creatorId = this.authService.getUser()?.id || null;
+    if (companyId) {
+      payload.createdByCompanyId = companyId;
+      payload.idEmpresaMaster = companyId;
+      if (this.authService.isAdmin()) {
+        payload.companyId = companyId;
+      }
+    }
+    if (creatorId) {
+      payload.idUsuarioMaster = creatorId;
+    }
+    this.userService.create(payload).subscribe({
       next: () => {
         this.router.navigate(['/users']);
       },

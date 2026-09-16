@@ -15,6 +15,10 @@ export class IngresoService {
     return this.http.get<Ingreso[]>(this.apiUrl);
   }
 
+  findByCompany(companyId: number): Observable<Ingreso[]> {
+    return this.http.get<Ingreso[]>(`${this.apiUrl}/by-company/${companyId}`);
+  }
+
   findOne(id: number): Observable<Ingreso> {
     return this.http.get<Ingreso>(`${this.apiUrl}/${id}`);
   }

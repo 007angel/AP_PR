@@ -3,6 +3,7 @@ export interface IngresoDetalle {
   ingreso_id: number;
   lote: string;
   articulo: string;
+  articuloId?: number | null;
   tarima: number;
   caja: number;
   unidad: number;
@@ -12,6 +13,9 @@ export interface IngresoDetalle {
   mermas: number;
   devolucion: number;
   costoIndividual: number;
+  foto?: string;
+  companyId?: number | null;
+  userId?: number | null;
   created_at?: Date;
   updated_at?: Date;
 }

@@ -7,11 +7,13 @@ import { UserService } from '../../services/user.service';
 import { AuthService } from '../../services/auth.service';
 import { Company } from '../../models/company.model';
 import { User } from '../../models/user.model';
+import { ConfirmDialogComponent } from '../../shared/confirm-dialog/confirm-dialog.component';
+import { ConfirmService } from '../../shared/confirm-dialog/confirm.service';
 
 @Component({
   selector: 'app-company-list',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink],
+  imports: [CommonModule, FormsModule, RouterLink, ConfirmDialogComponent],
   templateUrl: './company-list.component.html',
   styleUrls: ['./company-list.component.scss']
 })
@@ -34,7 +36,8 @@ export class CompanyListComponent implements OnInit {
   constructor(
     private companyService: CompanyService,
     private userService: UserService,
-    private authService: AuthService
+    private authService: AuthService,
+    private confirmService: ConfirmService
   ) {}
 
   ngOnInit() {
@@ -205,8 +208,16 @@ export class CompanyListComponent implements OnInit {
   unlinkUser(userId: number) {
     if (!this.selectedCompany) return;
     
-    if (confirm('¿Estás seguro de desvincular este usuario?')) {
-      this.companyService.unlinkUser(this.selectedCompany.id!, userId).subscribe({
+    this.confirmService.confirm({
+      title: 'Desvincular usuario',
+      message: '¿Estás seguro de desvincular este usuario de la empresa?',
+      confirmText: 'Si, desvincular',
+      cancelText: 'Cancelar'
+    }).subscribe(ok => {
+      if (!ok) {
+        return;
+      }
+      this.companyService.unlinkUser(this.selectedCompany!.id!, userId).subscribe({
         next: () => {
           this.loadCompanyUsers(this.selectedCompany!.id!);
           this.successMessage = 'Usuario desvinculado correctamente';
@@ -217,11 +228,19 @@ export class CompanyListComponent implements OnInit {
           setTimeout(() => this.errorMessage = '', 3000);
         }
       });
-    }
+    });
   }
 
   deleteCompany(id: number) {
-    if (confirm('¿Estás seguro de eliminar esta empresa?')) {
+    this.confirmService.confirm({
+      title: 'Eliminar empresa',
+      message: '¿Estás seguro de eliminar esta empresa? Esta acción no se puede deshacer.',
+      confirmText: 'Si, eliminar',
+      cancelText: 'Cancelar'
+    }).subscribe(ok => {
+      if (!ok) {
+        return;
+      }
       this.companyService.delete(id).subscribe({
         next: () => {
           this.companies = this.companies.filter(c => c.id !== id);
@@ -234,6 +253,6 @@ export class CompanyListComponent implements OnInit {
           setTimeout(() => this.errorMessage = '', 3000);
         }
       });
-    }
+    });
   }
 }

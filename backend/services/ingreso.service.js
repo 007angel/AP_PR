@@ -1,3 +1,4 @@
+const boom = require('@hapi/boom');
 const sequelize = require('../libs/sequelize')
 const CorrelativoTrService = require('./correlativo.service')
 
@@ -7,7 +8,8 @@ class IngresoTrService{
     }
 
     async create(data){
-        const newIngreso = await sequelize.models.IngresoTr.create(data)
+        // El estado es automatico: todo ingreso nace pendiente
+        const newIngreso = await sequelize.models.IngresoTr.create({ ...data, status: 'pendiente' })
         return newIngreso
     }
 
@@ -38,15 +40,21 @@ class IngresoTrService{
     async update(id, changes){
         const existing = await sequelize.models.IngresoTr.findByPk(id)
         if(!existing) return null
-        await existing.update(changes)
+        // El estado es automatico (lo gestiona el detalle), se ignora cualquier cambio manual
+        const { status, ...safeChanges } = changes
+        await existing.update(safeChanges)
         return await this.findOne(id)
     }
 
     async delete(id){
         const ingreso = await sequelize.models.IngresoTr.findByPk(id)
         if(!ingreso) return null
-        await ingreso.destroy()
-        return { id }
+        if(ingreso.status === 'completado'){
+            throw boom.conflict('El estado completado no permite la eliminacion, contacte a su supervisor')
+        }
+        // Anulacion suave: cambia estado y libera la factura para poder reingresar
+        await ingreso.update({ status: 'anulado', numeroFactura: null })
+        return await this.findOne(id)
     }
 
     async findByCompany(companyId){
@@ -58,7 +66,7 @@ class IngresoTrService{
     }
 
     async generateCorrelativo(companyId){
-        return await this.correlativoService.generateCorrelativo(companyId, 'ingreso', 'ING')
+        return await this.correlativoService.generateCorrelativo(companyId, 'ing')
     }
 
     async getStats(){

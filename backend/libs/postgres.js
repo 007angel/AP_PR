@@ -1,18 +1,19 @@
-const { Client} = require('pg')
+const { Client } = require('pg');
+const { config } = require('../config/config');
 
-async function getConection(){
-const client = new Client({
-    host: 'localhost',
-    port: '5432',
-    user: 'postgres',
-    password:'abc123..',
-    database:'postgres'
-})
-await client.connect();
-return client;
+async function getConection() {
+  const client = new Client({
+    host: config.dbHost,
+    port: config.dbPort,
+    user: config.dbUser,
+    password: config.dbPassword,
+    database: config.dbName
+  });
+  await client.connect();
+  return client;
 }
 
-module.exports=getConection;
+module.exports = getConection;
 
 
 

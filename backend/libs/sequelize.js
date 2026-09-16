@@ -27,7 +27,7 @@ sequelize.authenticate()
     });
 
 // Sincronizar la base de datos (crear tablas si no existen)
-sequelize.sync({ force: false }) // `force: false` evita borrar las tablas existentes
+sequelize.sync({ alter: true }) // `alter: true` agrega columnas faltantes sin borrar datos
     .then(() => {
         console.log('Base de datos y tablas sincronizadas correctamente');
     })

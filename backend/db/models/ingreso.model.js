@@ -15,7 +15,7 @@ const IngresoTrSchema={
     unique:true
   },
   numeroFactura:{
-    allowNull:false,
+    allowNull:true,
     type:DataTypes.STRING,
     field:'numero_factura'
   },

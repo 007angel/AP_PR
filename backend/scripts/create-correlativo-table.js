@@ -5,14 +5,14 @@ async function createCorrelativoTable() {
     await sequelize.query(`
       CREATE TABLE IF NOT EXISTS correlativo_tr (
         id SERIAL PRIMARY KEY,
-        company_id INTEGER NOT NULL REFERENCES company_tr(id),
-        tipo VARCHAR(20) NOT NULL,
-        prefijo VARCHAR(10) NOT NULL,
-        ultimo_numero INTEGER DEFAULT 0,
+        tipo VARCHAR(10) NOT NULL,
+        cod_empresa INTEGER NOT NULL REFERENCES company_tr(id),
+        numero INTEGER NOT NULL DEFAULT 0,
         descripcion VARCHAR(100),
+        fecha DATE,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        UNIQUE(company_id, tipo)
+        UNIQUE(tipo, cod_empresa)
       );
     `);
     console.log('Tabla correlativo_tr creada exitosamente');

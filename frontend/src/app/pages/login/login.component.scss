@@ -19,8 +19,15 @@
       align-items: center;
       gap: 12px;
 
-      .logo-icon {
-        font-size: 32px;
+      .logo-icon-wrapper {
+        width: 40px;
+        height: 40px;
+        background: rgba(255, 255, 255, 0.15);
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
       }
 
       .logo-text {
@@ -67,7 +74,15 @@
         max-width: 320px;
 
         .feature-icon {
-          font-size: 22px;
+          width: 36px;
+          height: 36px;
+          background: rgba(255, 255, 255, 0.1);
+          border-radius: 8px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          flex-shrink: 0;
+          color: rgba(255, 255, 255, 0.9);
         }
 
         span {
@@ -119,8 +134,15 @@
   text-align: center;
 
   .expired-icon {
-    font-size: 48px;
-    margin-bottom: 16px;
+    width: 72px;
+    height: 72px;
+    background: rgba(217, 119, 6, 0.15);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 16px;
+    color: var(--warning);
   }
 
   h3 {
@@ -202,7 +224,6 @@
   }
 
   .error-icon {
-    font-size: 20px;
     flex-shrink: 0;
     margin-top: 2px;
   }
@@ -402,8 +423,8 @@
     }
 
     span {
-      font-weight: 700;
-      font-size: 16px;
+      font-weight: 600;
+      font-size: 14px;
     }
 
     &.btn-google span {

@@ -1,6 +1,8 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { ModuloService } from '../../services/modulo.service';
+import { Modulo } from '../../models/modulo.model';
 
 @Component({
   selector: 'app-inventory-layout',
@@ -21,74 +23,19 @@ import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
         </div>
 
         <nav class="sidebar-nav">
-          <a routerLink="/inventory/dashboard" routerLinkActive="active" class="nav-item">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <rect x="3" y="3" width="7" height="7"></rect>
-              <rect x="14" y="3" width="7" height="7"></rect>
-              <rect x="14" y="14" width="7" height="7"></rect>
-              <rect x="3" y="14" width="7" height="7"></rect>
-            </svg>
-            <span>Dashboard</span>
-          </a>
-
-          <div class="nav-section">Ingresos</div>
-          <a routerLink="/inventory/ingreso" routerLinkActive="active" class="nav-item">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M12 5v14M5 12h14"></path>
-            </svg>
-            <span>Ingresos</span>
-          </a>
-          <a routerLink="/inventory/ingreso/movimientos" routerLinkActive="active" class="nav-item">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
-            </svg>
-            <span>Movimientos</span>
-          </a>
-
-          <div class="nav-section">Salidas</div>
-          <a routerLink="/inventory/salida" routerLinkActive="active" class="nav-item">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M12 19V5M5 12l7-7 7 7"></path>
-            </svg>
-            <span>Salidas</span>
-          </a>
-
-          <div class="nav-section">Solicitudes</div>
-          <a routerLink="/inventory/solicitudes" routerLinkActive="active" class="nav-item">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-              <polyline points="14 2 14 8 20 8"></polyline>
-              <line x1="16" y1="13" x2="8" y2="13"></line>
-              <line x1="16" y1="17" x2="8" y2="17"></line>
-            </svg>
-            <span>Solicitudes</span>
-          </a>
-
-          <div class="nav-section">Reportes</div>
-          <a routerLink="/inventory/reportes/movimientos" routerLinkActive="active" class="nav-item">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <line x1="18" y1="20" x2="18" y2="10"></line>
-              <line x1="12" y1="20" x2="12" y2="4"></line>
-              <line x1="6" y1="20" x2="6" y2="14"></line>
-            </svg>
-            <span>Movimientos</span>
-          </a>
-          <a routerLink="/inventory/reportes/ingresos" routerLinkActive="active" class="nav-item">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <line x1="18" y1="20" x2="18" y2="10"></line>
-              <line x1="12" y1="20" x2="12" y2="4"></line>
-              <line x1="6" y1="20" x2="6" y2="14"></line>
-            </svg>
-            <span>Ingresos</span>
-          </a>
-          <a routerLink="/inventory/reportes/salidas" routerLinkActive="active" class="nav-item">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <line x1="18" y1="20" x2="18" y2="10"></line>
-              <line x1="12" y1="20" x2="12" y2="4"></line>
-              <line x1="6" y1="20" x2="6" y2="14"></line>
-            </svg>
-            <span>Salidas</span>
-          </a>
+          <ng-container *ngFor="let grupo of grupos">
+            <div class="nav-section" *ngIf="grupo.nombre">{{ grupo.nombre }}</div>
+            <a *ngFor="let modulo of grupo.modulos"
+              [routerLink]="modulo.ruta"
+              routerLinkActive="active"
+              class="nav-item">
+              <span class="nav-emoji">{{ modulo.icono || '📦' }}</span>
+              <span>{{ modulo.nombre }}</span>
+            </a>
+          </ng-container>
+          <div *ngIf="!isLoadingMenu && grupos.length === 0" class="menu-empty">
+            Sin módulos activos
+          </div>
         </nav>
 
         <div class="sidebar-footer">
@@ -163,6 +110,19 @@ import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
       padding: 16px 12px 8px;
     }
 
+    .menu-empty {
+      padding: 16px 12px;
+      font-size: 13px;
+      color: var(--text-tertiary);
+    }
+
+    .nav-emoji {
+      font-size: 20px;
+      width: 20px;
+      text-align: center;
+      line-height: 1;
+    }
+
     .nav-item {
       display: flex;
       align-items: center;
@@ -210,4 +170,36 @@ import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
     }
   `]
 })
-export class InventoryLayoutComponent {}
+export class InventoryLayoutComponent implements OnInit {
+  grupos: { nombre: string | null; modulos: Modulo[] }[] = [];
+  isLoadingMenu = true;
+
+  constructor(private moduloService: ModuloService) {}
+
+  ngOnInit() {
+    this.moduloService.findActivos().subscribe({
+      next: (data) => {
+        this.grupos = this.agruparPorSeccion(data);
+        this.isLoadingMenu = false;
+      },
+      error: () => {
+        this.grupos = [];
+        this.isLoadingMenu = false;
+      }
+    });
+  }
+
+  private agruparPorSeccion(modulos: Modulo[]): { nombre: string | null; modulos: Modulo[] }[] {
+    const grupos: { nombre: string | null; modulos: Modulo[] }[] = [];
+    for (const modulo of modulos) {
+      const seccion = modulo.seccion || null;
+      let grupo = grupos.find(g => g.nombre === seccion);
+      if (!grupo) {
+        grupo = { nombre: seccion, modulos: [] };
+        grupos.push(grupo);
+      }
+      grupo.modulos.push(modulo);
+    }
+    return grupos;
+  }
+}

@@ -18,7 +18,16 @@
     display: flex;
     align-items: center;
     gap: 10px;
-    .logo-icon { font-size: 28px; }
+    .logo-icon-wrapper {
+      width: 36px;
+      height: 36px;
+      background: linear-gradient(135deg, var(--accent-primary), var(--accent-hover));
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+    }
     .logo-text { font-size: 20px; font-weight: 700; color: var(--text-primary); }
   }
 
@@ -268,7 +277,14 @@
     }
 
     .service-icon {
-      font-size: 40px;
+      width: 56px;
+      height: 56px;
+      background: var(--accent-light);
+      color: var(--accent-primary);
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       margin-bottom: 20px;
     }
 
@@ -444,8 +460,15 @@
     }
 
     .contact-icon {
-      font-size: 36px;
-      margin-bottom: 16px;
+      width: 56px;
+      height: 56px;
+      background: var(--accent-light);
+      color: var(--accent-primary);
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 16px;
     }
 
     h4 {
@@ -483,7 +506,16 @@
         align-items: center;
         gap: 10px;
         margin-bottom: 16px;
-        .logo-icon { font-size: 24px; }
+        .logo-icon-wrapper {
+          width: 32px;
+          height: 32px;
+          background: linear-gradient(135deg, var(--accent-primary), var(--accent-hover));
+          border-radius: 8px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          color: white;
+        }
         .logo-text { font-size: 18px; font-weight: 700; color: white; }
       }
 

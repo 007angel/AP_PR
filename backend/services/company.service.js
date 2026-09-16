@@ -1,11 +1,14 @@
 const sequelize = require('../libs/sequelize')
 const bcrypt = require('bcryptjs')
+const CorrelativoTrService = require('./correlativo.service')
 
 class CompanyTrService{
     constructor(){}
 
     async create(data){
         const newCompany = await sequelize.models.CompanyTr.create(data)
+        const correlativoService = new CorrelativoTrService()
+        await correlativoService.initDefaultCorrelativos(newCompany.id)
         return newCompany
     }
 
@@ -49,6 +52,9 @@ class CompanyTrService{
             }, { transaction })
 
             await transaction.commit()
+
+            const correlativoService = new CorrelativoTrService()
+            await correlativoService.initDefaultCorrelativos(newCompany.id)
 
             const { password, ...adminWithoutPassword } = newAdmin.dataValues
             return { company: newCompany, admin: adminWithoutPassword }

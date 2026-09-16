@@ -1,15 +1,22 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { IngresoService } from '../../../services/ingreso.service';
+import { AnulacionService } from '../../../services/anulacion.service';
+import { AuthService } from '../../../services/auth.service';
+import { ConfirmDialogComponent } from '../../../shared/confirm-dialog/confirm-dialog.component';
+import { ConfirmService } from '../../../shared/confirm-dialog/confirm.service';
+import { ExcelUploadComponent } from '../../../shared/excel-upload/excel-upload.component';
 import { Ingreso } from '../../../models/ingreso.model';
 
 @Component({
   selector: 'app-ingreso-list',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, RouterLink, ConfirmDialogComponent, ExcelUploadComponent],
   template: `
     <div class="page-container">
+      <app-confirm-dialog></app-confirm-dialog>
+      <app-excel-upload #excelUpload (uploaded)="onExcelUploaded($event)"></app-excel-upload>
       <div class="page-header">
         <div class="header-content">
           <h1>Ingresos</h1>
@@ -19,6 +26,15 @@ import { Ingreso } from '../../../models/ingreso.model';
           <a routerLink="/inventory/dashboard" class="btn-back">
             ← Dashboard
           </a>
+          <button class="btn-excel" (click)="excelUpload.open()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+              <polyline points="14 2 14 8 20 8"></polyline>
+              <line x1="12" y1="18" x2="12" y2="12"></line>
+              <polyline points="9 15 12 12 15 15"></polyline>
+            </svg>
+            Subir Excel
+          </button>
           <button class="btn-primary" routerLink="/inventory/ingreso/new">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <line x1="12" y1="5" x2="12" y2="19"></line>
@@ -63,7 +79,7 @@ import { Ingreso } from '../../../models/ingreso.model';
               <td>{{ ingreso.cantidadTarimas }}</td>
               <td>{{ ingreso.usuarioDigito }}</td>
               <td>
-                <span class="status-badge" [class]="'status-' + ingreso.status">
+                <span class="status-badge" [class]="'status-' + (ingreso.status || 'pendiente')">
                   {{ getEstadoLabel(ingreso.status || 'pendiente') }}
                 </span>
               </td>
@@ -71,7 +87,7 @@ import { Ingreso } from '../../../models/ingreso.model';
                 <div class="action-buttons">
                   <a [routerLink]="['/inventory/ingreso', ingreso.id]" class="btn-action">Ver</a>
                   <a [routerLink]="['/inventory/ingreso', ingreso.id, 'detalle']" class="btn-action btn-detalle">Detalle</a>
-                  <button class="btn-action btn-delete" (click)="deleteIngreso(ingreso.id!)">Eliminar</button>
+                  <button class="btn-action btn-delete" (click)="deleteIngreso(ingreso.id!)">Anular</button>
                 </div>
               </td>
             </tr>
@@ -123,6 +139,7 @@ import { Ingreso } from '../../../models/ingreso.model';
     .status-pendiente { background: var(--warning-bg); color: var(--warning-text); }
     .status-completado { background: var(--success-bg); color: var(--success-text); }
     .status-cancelado { background: var(--danger-bg); color: var(--danger-text); }
+    .status-anulado { background: var(--bg-tertiary); color: var(--text-tertiary); }
     .action-buttons { display: flex; gap: 8px; }
     .btn-action { padding: 6px 12px; font-size: 12px; color: var(--accent-primary); background: var(--accent-bg); border: 1px solid var(--accent-border); border-radius: var(--radius-md); text-decoration: none; transition: var(--transition); cursor: pointer; }
     .btn-action:hover { background: var(--accent-primary); color: white; }
@@ -130,23 +147,35 @@ import { Ingreso } from '../../../models/ingreso.model';
     .btn-detalle:hover { background: var(--success-text); color: white; }
     .btn-delete { color: var(--danger-text); background: var(--danger-bg); border-color: var(--danger-border); }
     .btn-delete:hover { background: var(--danger); color: white; }
+    .btn-excel { display: inline-flex; align-items: center; gap: 8px; padding: 12px 24px; font-size: 14px; font-weight: 600; color: #059669; background: #ecfdf5; border: 1px solid #a7f3d0; border-radius: var(--radius-md); cursor: pointer; transition: var(--transition); }
+    .btn-excel:hover { background: #059669; color: white; border-color: #059669; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(5, 150, 105, 0.3); }
   `]
 })
-export class IngresoListComponent implements OnInit {
+export class IngresoListComponent {
+  @ViewChild('excelUpload') excelUpload!: ExcelUploadComponent;
   ingresos: Ingreso[] = [];
   successMessage = '';
   errorMessage = '';
 
-  constructor(private ingresoService: IngresoService) {}
+  constructor(
+    private ingresoService: IngresoService,
+    private anulacionService: AnulacionService,
+    private authService: AuthService,
+    private confirmService: ConfirmService
+  ) {}
 
   ngOnInit() {
     this.loadIngresos();
   }
 
   loadIngresos() {
-    this.ingresoService.findAll().subscribe({
+    const companyId = this.authService.getCompanyId();
+    const request = companyId
+      ? this.ingresoService.findByCompany(companyId)
+      : this.ingresoService.findAll();
+    request.subscribe({
       next: (ingresos) => {
-        this.ingresos = ingresos;
+        this.ingresos = ingresos.filter(i => i.status === 'pendiente' || i.status === 'completado');
       },
       error: () => {
         this.errorMessage = 'Error al cargar los ingresos';
@@ -155,27 +184,47 @@ export class IngresoListComponent implements OnInit {
   }
 
   getEstadoLabel(estado: string): string {
-    const labels: any = { pendiente: 'Pendiente', completado: 'Completado', cancelado: 'Cancelado' };
+    const labels: any = { pendiente: 'Pendiente', completado: 'Completado', cancelado: 'Cancelado', anulado: 'Anulado' };
     return labels[estado] || estado;
   }
 
   deleteIngreso(id: number) {
-    if (confirm('¿Estas seguro de eliminar este ingreso?')) {
-      this.ingresoService.delete(id).subscribe({
+    const ingreso = this.ingresos.find(i => i.id === id);
+    this.confirmService.prompt({
+      title: 'Solicitar anulacion',
+      message: `La anulacion del ingreso ${ingreso?.correlativo || '#' + id} requiere autorizacion del master.`,
+      inputLabel: 'Motivo de la anulacion',
+      inputPlaceholder: 'Describa el motivo (opcional)',
+      confirmText: 'Enviar solicitud',
+      cancelText: 'Cancelar'
+    }).subscribe(motivo => {
+      if (motivo === null) {
+        return;
+      }
+      this.anulacionService.create({
+        ingresoId: id,
+        motivo: motivo,
+        solicitadoPor: this.authService.getUser()?.id || null
+      }).subscribe({
         next: () => {
-          this.successMessage = 'Ingreso eliminado correctamente';
-          this.loadIngresos();
+          this.successMessage = 'Solicitud de anulacion enviada al master';
           setTimeout(() => {
             this.successMessage = '';
           }, 3000);
         },
-        error: () => {
-          this.errorMessage = 'Error al eliminar el ingreso';
+        error: (err) => {
+          this.errorMessage = err.error?.message || 'Error al enviar la solicitud';
           setTimeout(() => {
             this.errorMessage = '';
-          }, 3000);
+          }, 5000);
         }
       });
-    }
+    });
+  }
+
+  onExcelUploaded(result: any) {
+    this.successMessage = result.message || 'Ingreso creado exitosamente desde Excel';
+    this.loadIngresos();
+    setTimeout(() => { this.successMessage = ''; }, 5000);
   }
 }

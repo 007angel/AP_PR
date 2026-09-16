@@ -14,11 +14,11 @@ import { Ingreso } from '../../../models/ingreso.model';
     <div class="page-container">
       <div class="page-header">
         <div class="header-content">
-          <a routerLink="/inventory/ingreso" class="back-link">← Volver a Ingresos</a>
           <h1>{{ isEditMode ? 'Editar Ingreso' : 'Nuevo Ingreso' }}</h1>
           <p>{{ isEditMode ? 'Actualizar datos del ingreso' : 'Registrar un nuevo ingreso al inventario' }}</p>
         </div>
         <div class="header-actions">
+          <a routerLink="/inventory/ingreso" class="back-link">← Volver a Ingresos</a>
           <a routerLink="/inventory/dashboard" class="btn-back">
             ← Dashboard
           </a>
@@ -100,8 +100,8 @@ import { Ingreso } from '../../../models/ingreso.model';
                   id="cantidadTarimas"
                   name="cantidadTarimas"
                   [(ngModel)]="ingreso.cantidadTarimas"
-                  placeholder="0"
-                  min="0"
+                  placeholder="1"
+                  min="1"
                   required
                 />
               </div>
@@ -115,6 +115,7 @@ import { Ingreso } from '../../../models/ingreso.model';
                   [(ngModel)]="ingreso.usuarioDigito"
                   placeholder="Nombre del usuario"
                   required
+                  readonly
                 />
               </div>
             </div>
@@ -132,16 +133,10 @@ import { Ingreso } from '../../../models/ingreso.model';
               </div>
 
               <div class="form-group">
-                <label for="status">Estado</label>
-                <select
-                  id="status"
-                  name="status"
-                  [(ngModel)]="ingreso.status"
-                >
-                  <option value="pendiente">Pendiente</option>
-                  <option value="completado">Completado</option>
-                  <option value="cancelado">Cancelado</option>
-                </select>
+                <label>Estado (automatico)</label>
+                <span class="status-badge" [class]="'status-' + (ingreso.status || 'pendiente')">
+                  {{ ingreso.status === 'completado' ? 'Completado' : ingreso.status === 'cancelado' ? 'Cancelado' : 'Pendiente' }}
+                </span>
               </div>
             </div>
 
@@ -298,6 +293,19 @@ import { Ingreso } from '../../../models/ingreso.model';
       select {
         cursor: pointer;
       }
+
+      .status-badge {
+        display: inline-block;
+        align-self: flex-start;
+        padding: 8px 16px;
+        border-radius: 20px;
+        font-size: 13px;
+        font-weight: 600;
+      }
+
+      .status-pendiente { background: var(--warning-bg); color: var(--warning-text); }
+      .status-completado { background: var(--success-bg); color: var(--success-text); }
+      .status-cancelado { background: var(--danger-bg); color: var(--danger-text); }
     }
 
     .form-actions {
@@ -398,12 +406,13 @@ export class IngresoDetailComponent implements OnInit {
     this.ingreso.fechaDigitacion = this.formatDateForInput(new Date());
     this.ingreso.usuarioDigito = this.authService.getUser()?.name || '';
     
-    this.ingresoService.getCorrelativo(this.authService.getCompanyId() || 0).subscribe({
+    const companyId = this.authService.getCompanyId() || 0;
+    this.ingresoService.getCorrelativo(companyId).subscribe({
       next: (response) => {
         this.ingreso.correlativo = response.correlativo;
       },
       error: () => {
-        this.ingreso.correlativo = 'ING-00001';
+        this.ingreso.correlativo = `ING${String(companyId).padStart(3, '0')}0001`;
       }
     });
   }
@@ -441,13 +450,14 @@ export class IngresoDetailComponent implements OnInit {
     this.errorMessage = '';
     this.successMessage = '';
 
-    const ingresoData = {
+    const ingresoData: any = {
       ...this.ingreso,
       fechaIngreso: new Date(this.ingreso.fechaIngreso),
       fechaDigitacion: new Date(this.ingreso.fechaDigitacion)
     };
 
     if (this.isEditMode) {
+      delete ingresoData.status;
       this.ingresoService.update(parseInt(this.ingresoId), ingresoData).subscribe({
         next: () => {
           this.successMessage = 'Ingreso actualizado correctamente';
@@ -462,6 +472,9 @@ export class IngresoDetailComponent implements OnInit {
         }
       });
     } else {
+      ingresoData.status = 'pendiente';
+      ingresoData.companyId = this.authService.getCompanyId();
+      ingresoData.userId = this.authService.getUser()?.id || null;
       this.ingresoService.create(ingresoData).subscribe({
         next: () => {
           this.successMessage = 'Ingreso creado correctamente';
@@ -495,8 +508,8 @@ export class IngresoDetailComponent implements OnInit {
       this.errorMessage = 'La fecha de digitacion es requerida';
       return false;
     }
-    if (this.ingreso.cantidadTarimas < 0) {
-      this.errorMessage = 'La cantidad de tarimas debe ser mayor o igual a 0';
+    if (!this.ingreso.cantidadTarimas || this.ingreso.cantidadTarimas < 1) {
+      this.errorMessage = 'La cantidad de tarimas debe ser mayor a 0';
       return false;
     }
     if (!this.ingreso.usuarioDigito) {

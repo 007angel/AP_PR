@@ -21,6 +21,7 @@ export class AuthService {
   login(user: any): void {
     const loginData = {
       ...user,
+      companyId: user.companyId || user.company_id || null,
       loginAt: new Date().toISOString()
     };
     localStorage.setItem('user', JSON.stringify(loginData));
@@ -70,7 +71,7 @@ export class AuthService {
 
   getCompanyId(): number | null {
     const user = this.getUser();
-    return user?.companyId || null;
+    return user?.companyId || user?.company_id || null;
   }
 
   hasRole(roles: string[]): boolean {

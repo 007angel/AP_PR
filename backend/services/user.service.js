@@ -6,6 +6,16 @@ class UserTrService{
 
     async create(data){
         const hash = await bcrypt.hash(data.password, 10);
+        if (data.idEmpresaMaster && !data.createdByCompanyId) {
+            data.createdByCompanyId = data.idEmpresaMaster;
+        }
+        if (data.createdByCompanyId && !data.idEmpresaMaster) {
+            data.idEmpresaMaster = data.createdByCompanyId;
+        }
+        if (!data.codigo) {
+            const maxId = await sequelize.models.UserTr.max('id');
+            data.codigo = 'USR' + String((maxId || 0) + 1).padStart(4, '0');
+        }
         const newUser = await sequelize.models.UserTr.create({
             ...data,
             password: hash
@@ -30,6 +40,13 @@ class UserTrService{
     async countByCompany(companyId){
         const count = await sequelize.models.UserTr.count({
             where: { companyId }
+        })
+        return count
+    }
+
+    async countByEmpresaMaster(empresaId){
+        const count = await sequelize.models.UserTr.count({
+            where: { idEmpresaMaster: empresaId }
         })
         return count
     }

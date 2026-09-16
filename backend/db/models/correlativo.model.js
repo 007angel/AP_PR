@@ -9,28 +9,34 @@ const CorrelativoTrSchema={
     primaryKey:true,
     type:DataTypes.INTEGER
   },
-  companyId:{
-    allowNull:false,
-    type:DataTypes.INTEGER,
-    field:'company_id'
-  },
   tipo:{
     allowNull:false,
-    type:DataTypes.STRING
+    type:DataTypes.STRING(10),
+    comment:'Codigo corto del documento: ing, fac, sal, sol'
   },
-  prefijo:{
-    allowNull:false,
-    type:DataTypes.STRING
-  },
-  ultimoNumero:{
+  codEmpresa:{
     allowNull:false,
     type:DataTypes.INTEGER,
-    field:'ultimo_numero',
-    defaultValue:0
+    field:'cod_empresa',
+    references:{
+      model:'company_tr',
+      key:'id'
+    }
+  },
+  numero:{
+    allowNull:false,
+    type:DataTypes.INTEGER,
+    defaultValue:0,
+    comment:'Ultimo numero utilizado'
   },
   descripcion:{
     allowNull:true,
-    type:DataTypes.STRING
+    type:DataTypes.STRING(100)
+  },
+  fecha:{
+    allowNull:true,
+    type:DataTypes.DATEONLY,
+    comment:'Fecha de la ultima generacion'
   },
   createdAt:{
     allowNull:false,
@@ -48,7 +54,7 @@ const CorrelativoTrSchema={
 
 class CorrelativoTr extends Model{
   static associate(models){
-    this.belongsTo(models.CompanyTr, { foreignKey: 'companyId', as: 'company' })
+    this.belongsTo(models.CompanyTr, { foreignKey: 'codEmpresa', as: 'company' })
   }
 
   static config(sequelize){
@@ -56,7 +62,13 @@ class CorrelativoTr extends Model{
       sequelize,
       tableName:CORRELATIVO_TR_TABLE,
       modelName:'CorrelativoTr',
-      timestamps:false
+      timestamps:false,
+      indexes:[
+        {
+          unique:true,
+          fields:['tipo','cod_empresa']
+        }
+      ]
     }
   }
 }

@@ -9,7 +9,22 @@ const service = new ingresoService();
 router.get('/',
 async(req, res, next)=>{
   try{
-    const ingresos = await service.find();
+    const { companyId } = req.query
+    const ingresos = companyId
+      ? await service.findByCompany(parseInt(companyId))
+      : await service.find();
+    res.json(ingresos)
+  }catch(error){
+    next(error)
+  }
+}
+)
+
+router.get('/by-company/:companyId',
+async(req, res, next)=>{
+  try{
+    const { companyId } = req.params
+    const ingresos = await service.findByCompany(parseInt(companyId))
     res.json(ingresos)
   }catch(error){
     next(error)
@@ -113,7 +128,7 @@ async(req, res, next)=>{
     if(!result){
       res.status(404).json({message:'Ingreso no encontrado'})
     }else{
-      res.json({message:'Ingreso eliminado', id})
+      res.json({message:'Ingreso anulado', ingreso: result})
     }
   }catch(error){
     next(error)

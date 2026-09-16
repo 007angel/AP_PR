@@ -33,14 +33,7 @@ router.get('/generate/:companyId/:tipo',
 async(req, res, next)=>{
   try{
     const{ companyId, tipo }= req.params;
-    const prefijos = { ingreso: 'ING', factura: 'FAC', salida: 'SAL', solicitud: 'SOL' };
-    const prefijo = prefijos[tipo];
-    
-    if(!prefijo){
-      return res.status(400).json({message:'Tipo de correlativo no valido'})
-    }
-    
-    const correlativo= await service.generateCorrelativo(companyId, tipo, prefijo);
+    const correlativo= await service.generateCorrelativo(companyId, tipo);
     res.json({ correlativo })
   }catch(error){
     next(error)

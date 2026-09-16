@@ -494,7 +494,7 @@ export class InventoryDashboardComponent implements OnInit {
   loadRecentIngresos() {
     this.ingresoService.getRecent(5).subscribe({
       next: (ingresos) => {
-        this.recentIngresos = ingresos;
+        this.recentIngresos = ingresos.filter(i => i.status !== 'anulado');
         this.isLoading = false;
       },
       error: () => {

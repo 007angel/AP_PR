@@ -46,6 +46,38 @@ const UserTrSchema={
       key:'id'
     }
   },
+  codigo:{
+    allowNull:true,
+    type:DataTypes.STRING,
+    unique:true
+  },
+  createdByCompanyId:{
+    allowNull:true,
+    type:DataTypes.INTEGER,
+    field:'created_by_company_id',
+    references:{
+      model:'company_tr',
+      key:'id'
+    }
+  },
+  idUsuarioMaster:{
+    allowNull:true,
+    type:DataTypes.INTEGER,
+    field:'id_usuario_master',
+    references:{
+      model:'user_tr',
+      key:'id'
+    }
+  },
+  idEmpresaMaster:{
+    allowNull:true,
+    type:DataTypes.INTEGER,
+    field:'id_empresa_master',
+    references:{
+      model:'company_tr',
+      key:'id'
+    }
+  },
   createdAt:{
     allowNull:false,
     type:DataTypes.DATE,

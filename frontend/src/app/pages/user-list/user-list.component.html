@@ -1,4 +1,5 @@
 <div class="user-list-container">
+  <app-confirm-dialog></app-confirm-dialog>
   <div class="page-header">
     <div class="header-content">
       <h1>Gestion de Usuarios</h1>
@@ -143,10 +144,13 @@
             />
           </th>
           <th>ID</th>
+          <th>Código</th>
           <th>Nombre</th>
           <th>Email</th>
           <th>Rol</th>
           <th>Modulos</th>
+          <th>Creado por</th>
+          <th>ID Master</th>
           <th>Estado</th>
           <th>Dias</th>
           <th>Acciones</th>
@@ -163,6 +167,7 @@
             />
           </td>
           <td>{{ user.id }}</td>
+          <td><code>{{ user.codigo || '—' }}</code></td>
           <td class="name-cell">{{ user.name }}</td>
           <td>{{ user.email }}</td>
           <td>
@@ -173,6 +178,8 @@
           <td class="modules-cell">
             <span class="modules-text">{{ getModuleNames(user.modules) }}</span>
           </td>
+          <td>{{ getCreatorName(user) }}</td>
+          <td>{{ user.idUsuarioMaster || '—' }}</td>
           <td>
             <span class="status-badge" [class]="getStatusClass(user.status)">
               {{ getStatusLabel(user.status) }}

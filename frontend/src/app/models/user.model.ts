@@ -7,6 +7,10 @@ export interface User {
   modules?: string[];
   status: 'active' | 'inactive' | 'suspended' | 'trial';
   companyId?: number;
+  codigo?: string;
+  createdByCompanyId?: number | null;
+  idUsuarioMaster?: number | null;
+  idEmpresaMaster?: number | null;
   createdAt?: string;
   updatedAt?: string;
 }

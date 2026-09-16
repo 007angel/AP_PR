@@ -10,11 +10,11 @@ import { RouterLink, ActivatedRoute } from '@angular/router';
     <div class="page-container">
       <div class="page-header">
         <div class="header-content">
-          <a routerLink="/inventory/salida" class="back-link">← Volver a Salidas</a>
           <h1>Detalle de Salida #{{ salidaId }}</h1>
           <p>Informacion detallada de la salida</p>
         </div>
         <div class="header-actions">
+          <a routerLink="/inventory/salida" class="back-link">← Volver a Salidas</a>
           <a routerLink="/inventory/dashboard" class="btn-back">
             ← Dashboard
           </a>

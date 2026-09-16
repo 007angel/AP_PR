@@ -13,6 +13,9 @@ const entregado = Joi.number().integer();
 const mermas = Joi.number().integer();
 const devolucion = Joi.number().integer();
 const costoIndividual = Joi.number();
+const foto = Joi.string().allow('', null);
+const companyId = Joi.number().integer().allow(null);
+const userId = Joi.number().integer().allow(null);
 
 const createIngresoDetalleSchema = Joi.object({
   ingreso_id: ingresoId.required(),
@@ -21,12 +24,17 @@ const createIngresoDetalleSchema = Joi.object({
   tarima: tarima.required(),
   caja: caja.required(),
   unidad: unidad.required(),
-  total_ingreso: totalIngreso.required(),
+  total_ingreso: totalIngreso,
+  totalIngreso: totalIngreso.required(),
   solicitado: solicitado.required(),
   entregado: entregado.required(),
   mermas: mermas.required(),
   devolucion: devolucion.required(),
-  costo_individual: costoIndividual.required()
+  costo_individual: costoIndividual,
+  costoIndividual: costoIndividual.required(),
+  foto: foto,
+  companyId: companyId,
+  userId: userId
 });
 
 const updateIngresoDetalleSchema = Joi.object({
@@ -36,11 +44,16 @@ const updateIngresoDetalleSchema = Joi.object({
   caja: caja,
   unidad: unidad,
   total_ingreso: totalIngreso,
+  totalIngreso: totalIngreso,
   solicitado: solicitado,
   entregado: entregado,
   mermas: mermas,
   devolucion: devolucion,
-  costo_individual: costoIndividual
+  costo_individual: costoIndividual,
+  costoIndividual: costoIndividual,
+  foto: foto,
+  companyId: companyId,
+  userId: userId
 });
 
 const getIngresoDetalleSchema = Joi.object({
