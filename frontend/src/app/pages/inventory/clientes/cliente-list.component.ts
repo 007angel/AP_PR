@@ -3,8 +3,10 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { ClienteService } from '../../../services/cliente.service';
+import { ArticuloService } from '../../../services/articulo.service';
 import { AuthService } from '../../../services/auth.service';
 import { Cliente } from '../../../models/cliente.model';
+import { Articulo } from '../../../models/articulo.model';
 import { ConfirmDialogComponent } from '../../../shared/confirm-dialog/confirm-dialog.component';
 import { ConfirmService } from '../../../shared/confirm-dialog/confirm.service';
 
@@ -109,6 +111,7 @@ import { ConfirmService } from '../../../shared/confirm-dialog/confirm.service';
               <td>{{ c.contacto || '—' }}</td>
               <td>
                 <div class="action-buttons">
+                  <button class="btn-action btn-articulos" (click)="openArticulos(c)">Artículos</button>
                   <button class="btn-action" (click)="editCliente(c)">Editar</button>
                   <button class="btn-action btn-delete" (click)="deleteCliente(c.id!)">Eliminar</button>
                 </div>
@@ -116,6 +119,38 @@ import { ConfirmService } from '../../../shared/confirm-dialog/confirm.service';
             </tr>
           </tbody>
         </table>
+      </div>
+
+      <!-- Modal Artículos del Cliente -->
+      <div class="modal-overlay" *ngIf="showArticulosModal" (click)="closeArticulos()">
+        <div class="modal-content" (click)="$event.stopPropagation()">
+          <div class="modal-header">
+            <h3>Artículos de {{ articuloCliente?.nombre }}</h3>
+            <button class="btn-close" (click)="closeArticulos()">&times;</button>
+          </div>
+          <div class="modal-body">
+            <p class="modal-hint">Seleccione los artículos que este cliente puede solicitar.</p>
+            <div class="articulos-search">
+              <input type="text" [(ngModel)]="articuloSearchTerm" (input)="filterArticulosDisponibles()" placeholder="Buscar artículo...">
+            </div>
+            <div class="articulos-list">
+              <label *ngFor="let a of articulosFiltered" class="articulo-check">
+                <input type="checkbox" [checked]="isArticuloSelected(a.id!)" (change)="toggleArticulo(a.id!)">
+                <span class="check-info">
+                  <span class="check-nombre">{{ a.nombre }}</span>
+                  <span class="check-meta" *ngIf="a.codigo">{{ a.codigo }}</span>
+                </span>
+              </label>
+              <p *ngIf="articulosFiltered.length === 0" class="empty-list">No hay artículos disponibles</p>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button class="btn-secondary" (click)="closeArticulos()">Cancelar</button>
+            <button class="btn-primary" (click)="saveArticulosCliente()" [disabled]="isSavingArticulos">
+              {{ isSavingArticulos ? 'Guardando...' : 'Guardar' }}
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   `,
@@ -159,6 +194,26 @@ import { ConfirmService } from '../../../shared/confirm-dialog/confirm.service';
     .btn-action:hover { background: var(--accent-primary); color: white; }
     .btn-delete { color: var(--danger-text); background: var(--danger-bg); border-color: var(--danger-border); }
     .btn-delete:hover { background: var(--danger); color: white; }
+    .btn-articulos { color: #059669; background: #ecfdf5; border-color: #a7f3d0; }
+    .btn-articulos:hover { background: #059669; color: white; }
+
+    .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 1000; }
+    .modal-content { background: var(--bg-secondary); border: 1px solid var(--border-primary); border-radius: var(--radius-lg); width: 500px; max-height: 80vh; display: flex; flex-direction: column; }
+    .modal-header { display: flex; justify-content: space-between; align-items: center; padding: 20px 24px; border-bottom: 1px solid var(--border-primary); }
+    .modal-header h3 { margin: 0; font-size: 16px; font-weight: 600; color: var(--text-primary); }
+    .btn-close { background: none; border: none; font-size: 24px; color: var(--text-tertiary); cursor: pointer; padding: 0; line-height: 1; }
+    .modal-body { padding: 20px 24px; overflow-y: auto; flex: 1; }
+    .modal-hint { font-size: 13px; color: var(--text-tertiary); margin: 0 0 16px; }
+    .modal-footer { display: flex; justify-content: flex-end; gap: 10px; padding: 16px 24px; border-top: 1px solid var(--border-primary); }
+    .articulos-search { margin-bottom: 12px; }
+    .articulos-search input { width: 100%; padding: 10px 14px; font-size: 14px; border: 1px solid var(--border-primary); border-radius: var(--radius-md); background: var(--bg-primary); color: var(--text-primary); outline: none; box-sizing: border-box; }
+    .articulos-list { display: flex; flex-direction: column; gap: 4px; }
+    .articulo-check { display: flex; align-items: center; gap: 10px; padding: 8px 12px; border-radius: var(--radius-md); cursor: pointer; transition: var(--transition); }
+    .articulo-check:hover { background: var(--bg-tertiary); }
+    .check-info { display: flex; flex-direction: column; gap: 2px; }
+    .check-nombre { font-size: 14px; color: var(--text-primary); }
+    .check-meta { font-size: 12px; color: var(--text-tertiary); }
+    .empty-list { text-align: center; color: var(--text-tertiary); padding: 24px; }
 
     @media (max-width: 768px) { .form-grid { grid-template-columns: 1fr; } }
   `]
@@ -172,10 +227,19 @@ export class ClienteListComponent implements OnInit {
   successMessage = '';
   errorMessage = '';
 
+  showArticulosModal = false;
+  articuloCliente: Cliente | null = null;
+  allArticulos: Articulo[] = [];
+  articulosFiltered: Articulo[] = [];
+  selectedArticuloIds: Set<number> = new Set();
+  articuloSearchTerm = '';
+  isSavingArticulos = false;
+
   form: Partial<Cliente> = this.getEmptyForm();
 
   constructor(
     private clienteService: ClienteService,
+    private articuloService: ArticuloService,
     private authService: AuthService,
     private confirmService: ConfirmService
   ) {}
@@ -262,5 +326,78 @@ export class ClienteListComponent implements OnInit {
         }
       });
     });
+  }
+
+  openArticulos(cliente: Cliente) {
+    this.articuloCliente = cliente;
+    this.selectedArticuloIds = new Set();
+    this.articuloSearchTerm = '';
+    this.showArticulosModal = true;
+    const companyId = this.authService.getCompanyId();
+    this.articuloService.findAll(companyId).subscribe({
+      next: (arts) => {
+        this.allArticulos = arts;
+        this.articulosFiltered = arts;
+        this.loadClienteArticulos(cliente.id!);
+      }
+    });
+  }
+
+  loadClienteArticulos(clienteId: number) {
+    this.clienteService.getArticulosByCliente(clienteId).subscribe({
+      next: (arts) => {
+        this.selectedArticuloIds = new Set(arts.map((a: any) => a.id));
+      },
+      error: () => {}
+    });
+  }
+
+  filterArticulosDisponibles() {
+    const term = this.articuloSearchTerm.toLowerCase().trim();
+    if (!term) {
+      this.articulosFiltered = this.allArticulos;
+      return;
+    }
+    this.articulosFiltered = this.allArticulos.filter(a =>
+      (a.nombre && a.nombre.toLowerCase().includes(term)) ||
+      (a.codigo && a.codigo.toLowerCase().includes(term))
+    );
+  }
+
+  isArticuloSelected(id: number): boolean {
+    return this.selectedArticuloIds.has(id);
+  }
+
+  toggleArticulo(id: number) {
+    if (this.selectedArticuloIds.has(id)) {
+      this.selectedArticuloIds.delete(id);
+    } else {
+      this.selectedArticuloIds.add(id);
+    }
+  }
+
+  saveArticulosCliente() {
+    if (!this.articuloCliente) return;
+    this.isSavingArticulos = true;
+    const payload = { articuloIds: Array.from(this.selectedArticuloIds) };
+    fetch(`/api/v1/cliente/${this.articuloCliente.id}/articulos`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    }).then(res => {
+      this.isSavingArticulos = false;
+      this.showArticulosModal = false;
+      this.successMessage = 'Artículos actualizados para el cliente';
+      setTimeout(() => this.successMessage = '', 3000);
+    }).catch(() => {
+      this.isSavingArticulos = false;
+      this.errorMessage = 'Error al guardar artículos';
+      setTimeout(() => this.errorMessage = '', 5000);
+    });
+  }
+
+  closeArticulos() {
+    this.showArticulosModal = false;
+    this.articuloCliente = null;
   }
 }

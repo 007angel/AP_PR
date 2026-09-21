@@ -19,8 +19,10 @@ export class IngresoService {
     return this.http.get<Ingreso[]>(`${this.apiUrl}/by-company/${companyId}`);
   }
 
-  findOne(id: number): Observable<Ingreso> {
-    return this.http.get<Ingreso>(`${this.apiUrl}/${id}`);
+  findOne(id: number, companyId?: number): Observable<Ingreso> {
+    const params: any = {};
+    if (companyId) params.companyId = companyId;
+    return this.http.get<Ingreso>(`${this.apiUrl}/${id}`, { params });
   }
 
   create(data: Ingreso): Observable<Ingreso> {
@@ -39,11 +41,15 @@ export class IngresoService {
     return this.http.get<{ correlativo: string }>(`${this.apiUrl}/correlativo/${companyId}`);
   }
 
-  getStats(): Observable<{ total: number; pendientes: number; completados: number; cancelados: number; totalTarimas: number }> {
-    return this.http.get<{ total: number; pendientes: number; completados: number; cancelados: number; totalTarimas: number }>(`${this.apiUrl}/stats`);
+  getStats(companyId?: number): Observable<{ total: number; pendientes: number; completados: number; cancelados: number; totalTarimas: number }> {
+    const params: any = {};
+    if (companyId) params.companyId = companyId;
+    return this.http.get<{ total: number; pendientes: number; completados: number; cancelados: number; totalTarimas: number }>(`${this.apiUrl}/stats`, { params });
   }
 
-  getRecent(limit: number = 5): Observable<Ingreso[]> {
-    return this.http.get<Ingreso[]>(`${this.apiUrl}/recent?limit=${limit}`);
+  getRecent(limit: number = 5, companyId?: number): Observable<Ingreso[]> {
+    const params: any = { limit };
+    if (companyId) params.companyId = companyId;
+    return this.http.get<Ingreso[]>(`${this.apiUrl}/recent`, { params });
   }
 }

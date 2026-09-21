@@ -41,26 +41,91 @@ class IngresoDetalleTrService {
     return newDetalle;
   }
 
-  async find() {
-    const detalles = await sequelize.models.IngresoDetalleTr.findAll({ raw: true });
-    return detalles;
+  async find(companyId) {
+    const where = companyId ? { companyId } : {};
+    const detalles = await sequelize.models.IngresoDetalleTr.findAll({
+      where,
+      include: [{ model: sequelize.models.ArticuloTr, as: 'articuloRef', attributes: ['id', 'codigo', 'nombre', 'unidad', 'foto'] }],
+      raw: true,
+      nest: true
+    });
+    return detalles.map(d => ({
+      ...d,
+      articulo: (d.articuloRef && d.articuloRef.nombre) || d.articulo
+    }));
   }
 
-  async findOne(id) {
-    const detalle = await sequelize.models.IngresoDetalleTr.findByPk(id, { raw: true });
-    return detalle;
+  async findOne(id, companyId) {
+    const where = companyId ? { id, companyId } : { id };
+    const detalle = await sequelize.models.IngresoDetalleTr.findOne({
+      where,
+      include: [{ model: sequelize.models.ArticuloTr, as: 'articuloRef', attributes: ['id', 'codigo', 'nombre', 'unidad', 'foto'] }],
+      raw: true,
+      nest: true
+    });
+    if (!detalle) return null;
+    return {
+      ...detalle,
+      articulo: (detalle.articuloRef && detalle.articuloRef.nombre) || detalle.articulo
+    };
   }
 
-  async findByIngreso(ingresoId) {
+  async findByIngreso(ingresoId, companyId) {
+    const ingresoWhere = companyId ? { id: ingresoId, companyId } : { id: ingresoId };
+    const ingreso = await sequelize.models.IngresoTr.findOne({ where: ingresoWhere });
+    if (!ingreso) return [];
     const detalles = await sequelize.models.IngresoDetalleTr.findAll({
       where: { ingreso_id: ingresoId },
-      raw: true
+      include: [{ model: sequelize.models.ArticuloTr, as: 'articuloRef', attributes: ['id', 'codigo', 'nombre', 'unidad', 'foto'] }],
+      raw: true,
+      nest: true
     });
-    return detalles;
+
+    // Sync solicitado and entregado from solicitud_detalle_tr
+    const detalleIds = detalles.map(d => d.id);
+    if (detalleIds.length > 0) {
+      const [solicitudes] = await sequelize.query(`
+        SELECT
+          ingreso_detalle_id AS "detalleId",
+          COALESCE(SUM(cantidad_solicitada), 0) AS "totalSolicitado",
+          COALESCE(SUM(cantidad_entregada), 0) AS "totalEntregado"
+        FROM solicitud_detalle_tr
+        WHERE ingreso_detalle_id IN (:ids)
+        GROUP BY ingreso_detalle_id
+      `, { replacements: { ids: detalleIds } });
+
+      const solMap = {};
+      for (const s of solicitudes) {
+        solMap[s.detalleId] = s;
+      }
+
+      // Update DB and return computed values
+      for (const d of detalles) {
+        const sol = solMap[d.id];
+        if (sol) {
+          const nuevoSolicitado = parseInt(sol.totalSolicitado) || 0;
+          const nuevoEntregado = parseInt(sol.totalEntregado) || 0;
+          if (d.solicitado !== nuevoSolicitado || d.entregado !== nuevoEntregado) {
+            await sequelize.models.IngresoDetalleTr.update(
+              { solicitado: nuevoSolicitado, entregado: nuevoEntregado },
+              { where: { id: d.id } }
+            );
+            d.solicitado = nuevoSolicitado;
+            d.entregado = nuevoEntregado;
+          }
+        }
+      }
+    }
+
+    return detalles.map(d => ({
+      ...d,
+      articulo: (d.articuloRef && d.articuloRef.nombre) || d.articulo
+    }));
   }
 
-  async update(id, changes) {
-    const existing = await sequelize.models.IngresoDetalleTr.findByPk(id);
+  async update(id, changes, companyId) {
+    const where = companyId ? { id, companyId } : { id };
+    const existing = await sequelize.models.IngresoDetalleTr.findOne({ where });
     if (!existing) return null;
     const ingreso = await sequelize.models.IngresoTr.findByPk(existing.ingreso_id);
     if (ingreso && ingreso.status === 'completado') {
@@ -75,11 +140,16 @@ class IngresoDetalleTrService {
     }
     await existing.update(changes);
     await this.syncIngresoStatus(existing.ingreso_id);
-    return await this.findOne(id);
+    const updated = await sequelize.models.IngresoDetalleTr.findByPk(id, {
+      include: [{ model: sequelize.models.ArticuloTr, as: 'articuloRef', attributes: ['id', 'codigo', 'nombre', 'unidad', 'foto'] }],
+      raw: true, nest: true
+    });
+    return { ...updated, articulo: (updated.articuloRef && updated.articuloRef.nombre) || updated.articulo };
   }
 
-  async delete(id) {
-    const detalle = await sequelize.models.IngresoDetalleTr.findByPk(id);
+  async delete(id, companyId) {
+    const where = companyId ? { id, companyId } : { id };
+    const detalle = await sequelize.models.IngresoDetalleTr.findOne({ where });
     if (!detalle) return null;
     const ingreso = await sequelize.models.IngresoTr.findByPk(detalle.ingreso_id);
     if (ingreso && ingreso.status === 'completado') {
@@ -91,7 +161,10 @@ class IngresoDetalleTrService {
     return { id };
   }
 
-  async deleteByIngreso(ingresoId) {
+  async deleteByIngreso(ingresoId, companyId) {
+    const ingresoWhere = companyId ? { id: ingresoId, companyId } : { id: ingresoId };
+    const ingreso = await sequelize.models.IngresoTr.findOne({ where: ingresoWhere });
+    if (!ingreso) return null;
     await sequelize.models.IngresoDetalleTr.destroy({
       where: { ingreso_id: ingresoId }
     });

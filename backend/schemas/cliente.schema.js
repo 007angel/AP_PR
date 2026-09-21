@@ -31,7 +31,7 @@ const updateClienteSchema = Joi.object({
   rif: rif,
   contacto: contacto,
   observaciones: observaciones
-});
+}).options({ stripUnknown: true });
 
 const getClienteSchema = Joi.object({
   id: id.required()

@@ -13,6 +13,8 @@ const status = Joi.string().valid('pendiente', 'completado', 'cancelado', 'anula
 const valorTotal = Joi.number().min(0);
 const companyId = Joi.number().integer();
 const userId = Joi.number().integer();
+const clienteId = Joi.number().integer().allow(null);
+const userRole = Joi.string().valid('master', 'admin', 'user').optional();
 
 const createIngresoSchema = Joi.object({
   correlativo:correlativo.required(),
@@ -27,7 +29,9 @@ const createIngresoSchema = Joi.object({
   valor_total:valorTotal.optional(),
   valorTotal:valorTotal.optional(),
   companyId:companyId.optional(),
-  userId:userId.optional()
+  userId:userId.optional(),
+  clienteId:clienteId.optional(),
+  userRole:userRole
 })
 
 const updateIngresoSchema = Joi.object({
@@ -43,8 +47,9 @@ const updateIngresoSchema = Joi.object({
   valor_total:valorTotal,
   valorTotal:valorTotal,
   companyId:companyId,
-  userId:userId
-})
+  userId:userId,
+  clienteId:clienteId
+}).options({ stripUnknown: true })
 
 const getIngresoSchema = Joi.object({
   id:id.required()

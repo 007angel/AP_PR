@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { AnulacionService } from '../../services/anulacion.service';
+import { AuthService } from '../../services/auth.service';
 import { ConfirmDialogComponent } from '../../shared/confirm-dialog/confirm-dialog.component';
 import { ConfirmService } from '../../shared/confirm-dialog/confirm.service';
 import { Anulacion } from '../../models/anulacion.model';
@@ -14,6 +15,16 @@ import { Anulacion } from '../../models/anulacion.model';
   template: `
     <div class="page-container">
       <app-confirm-dialog></app-confirm-dialog>
+
+      <div *ngIf="!authorized" class="unauthorized-container">
+        <div class="unauthorized-icon">🚫</div>
+        <h2>No autorizado</h2>
+        <p>No tiene permiso para acceder a la gestion de anulaciones.</p>
+        <p>Solicite al administrador que le asigne el modulo de <strong>Anulaciones</strong>.</p>
+        <a routerLink="/inventory/dashboard" class="btn-back">← Volver al Dashboard</a>
+      </div>
+
+      <ng-container *ngIf="authorized">
       <div class="page-header">
         <div class="header-content">
           <h1>Anulaciones por Autorizar</h1>
@@ -90,6 +101,7 @@ import { Anulacion } from '../../models/anulacion.model';
           </table>
         </div>
       </div>
+      </ng-container>
     </div>
   `,
   styles: [`
@@ -98,6 +110,19 @@ import { Anulacion } from '../../models/anulacion.model';
       max-width: 1150px;
       margin: 0 auto;
     }
+
+    .unauthorized-container {
+      text-align: center;
+      padding: 80px 24px;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-primary);
+      border-radius: var(--radius-lg);
+    }
+    .unauthorized-icon { font-size: 48px; margin-bottom: 16px; }
+    .unauthorized-container h2 { font-size: 22px; font-weight: 700; color: var(--text-primary); margin: 0 0 8px; }
+    .unauthorized-container p { font-size: 14px; color: var(--text-tertiary); margin: 0 0 8px; }
+    .unauthorized-container .btn-back { display: inline-block; margin-top: 20px; padding: 10px 20px; font-size: 14px; font-weight: 600; color: var(--text-secondary); background: var(--bg-tertiary); border: 1px solid var(--border-primary); border-radius: var(--radius-md); text-decoration: none; transition: var(--transition); }
+    .unauthorized-container .btn-back:hover { background: var(--bg-hover); color: var(--text-primary); }
 
     .page-header {
       display: flex;
@@ -302,6 +327,7 @@ export class AnulacionListComponent implements OnInit {
   filtered: Anulacion[] = [];
   filtro = 'pendiente';
   isLoading = true;
+  authorized = false;
   successMessage: string | null = null;
   errorMessage: string | null = null;
 
@@ -314,16 +340,22 @@ export class AnulacionListComponent implements OnInit {
 
   constructor(
     private anulacionService: AnulacionService,
+    private authService: AuthService,
     private confirmService: ConfirmService
   ) {}
 
   ngOnInit() {
-    this.load();
+    const user = this.authService.getUser();
+    this.authorized = user?.role === 'master' || user?.role === 'admin' || this.authService.hasModule('anulaciones');
+    if (this.authorized) {
+      this.load();
+    }
   }
 
   load() {
     this.isLoading = true;
-    this.anulacionService.findAll().subscribe({
+    const companyId = this.authService.getCompanyId();
+    this.anulacionService.findAll(companyId).subscribe({
       next: (data) => {
         this.solicitudes = data;
         this.applyFilter();
@@ -364,7 +396,7 @@ export class AnulacionListComponent implements OnInit {
       if (!ok) {
         return;
       }
-      this.anulacionService.aprobar(s.id!).subscribe({
+      this.anulacionService.aprobar(s.id!, this.authService.getCompanyId()).subscribe({
         next: () => {
           this.showSuccess('Anulacion aprobada. El ingreso quedo anulado.');
           this.load();
@@ -386,7 +418,7 @@ export class AnulacionListComponent implements OnInit {
       if (!ok) {
         return;
       }
-      this.anulacionService.rechazar(s.id!).subscribe({
+      this.anulacionService.rechazar(s.id!, this.authService.getCompanyId()).subscribe({
         next: () => {
           this.showSuccess('Solicitud rechazada.');
           this.load();
@@ -408,7 +440,7 @@ export class AnulacionListComponent implements OnInit {
       if (!ok) {
         return;
       }
-      this.anulacionService.delete(id).subscribe({
+      this.anulacionService.delete(id, this.authService.getCompanyId()).subscribe({
         next: () => {
           this.solicitudes = this.solicitudes.filter(s => s.id !== id);
           this.applyFilter();

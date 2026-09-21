@@ -8,18 +8,20 @@ class IngresoTrService{
     }
 
     async create(data){
-        // El estado es automatico: todo ingreso nace pendiente
         const newIngreso = await sequelize.models.IngresoTr.create({ ...data, status: 'pendiente' })
         return newIngreso
     }
 
-    async find(){
-        const ingresos = await sequelize.models.IngresoTr.findAll({ raw: true })
+    async find(companyId){
+        const where = companyId ? { companyId } : {};
+        const ingresos = await sequelize.models.IngresoTr.findAll({ where, raw: true })
         return ingresos
     }
 
-    async findRecent(limit = 5){
+    async findRecent(limit = 5, companyId){
+        const where = companyId ? { companyId } : {};
         const ingresos = await sequelize.models.IngresoTr.findAll({ 
+            where,
             order: [['id', 'DESC']],
             limit: limit,
             raw: true
@@ -27,34 +29,36 @@ class IngresoTrService{
         return ingresos
     }
 
-    async findOne(id){
-        const ingreso = await sequelize.models.IngresoTr.findByPk(id, { raw: true })
+    async findOne(id, companyId){
+        const where = companyId ? { id, companyId } : { id };
+        const ingreso = await sequelize.models.IngresoTr.findOne({ where, raw: true })
         return ingreso
     }
 
-    async findByCorrelativo(correlativo){
-        const ingreso = await sequelize.models.IngresoTr.findOne({ where: { correlativo }, raw: true })
+    async findByCorrelativo(correlativo, companyId){
+        const where = companyId ? { correlativo, companyId } : { correlativo };
+        const ingreso = await sequelize.models.IngresoTr.findOne({ where, raw: true })
         return ingreso
     }
 
-    async update(id, changes){
-        const existing = await sequelize.models.IngresoTr.findByPk(id)
+    async update(id, changes, companyId){
+        const where = companyId ? { id, companyId } : { id };
+        const existing = await sequelize.models.IngresoTr.findOne({ where })
         if(!existing) return null
-        // El estado es automatico (lo gestiona el detalle), se ignora cualquier cambio manual
         const { status, ...safeChanges } = changes
         await existing.update(safeChanges)
-        return await this.findOne(id)
+        return await this.findOne(id, companyId)
     }
 
-    async delete(id){
-        const ingreso = await sequelize.models.IngresoTr.findByPk(id)
+    async delete(id, companyId){
+        const where = companyId ? { id, companyId } : { id };
+        const ingreso = await sequelize.models.IngresoTr.findOne({ where })
         if(!ingreso) return null
         if(ingreso.status === 'completado'){
             throw boom.conflict('El estado completado no permite la eliminacion, contacte a su supervisor')
         }
-        // Anulacion suave: cambia estado y libera la factura para poder reingresar
         await ingreso.update({ status: 'anulado', numeroFactura: null })
-        return await this.findOne(id)
+        return await this.findOne(id, companyId)
     }
 
     async findByCompany(companyId){
@@ -69,13 +73,15 @@ class IngresoTrService{
         return await this.correlativoService.generateCorrelativo(companyId, 'ing')
     }
 
-    async getStats(){
-        const total = await sequelize.models.IngresoTr.count()
-        const pendientes = await sequelize.models.IngresoTr.count({ where: { status: 'pendiente' } })
-        const completados = await sequelize.models.IngresoTr.count({ where: { status: 'completado' } })
-        const cancelados = await sequelize.models.IngresoTr.count({ where: { status: 'cancelado' } })
+    async getStats(companyId){
+        const where = companyId ? { companyId } : {};
+        const total = await sequelize.models.IngresoTr.count({ where })
+        const pendientes = await sequelize.models.IngresoTr.count({ where: { ...where, status: 'pendiente' } })
+        const completados = await sequelize.models.IngresoTr.count({ where: { ...where, status: 'completado' } })
+        const cancelados = await sequelize.models.IngresoTr.count({ where: { ...where, status: 'cancelado' } })
         
         const result = await sequelize.models.IngresoTr.findAll({
+            where,
             attributes: [
                 [sequelize.fn('SUM', sequelize.col('cantidad_tarimas')), 'totalTarimas']
             ],

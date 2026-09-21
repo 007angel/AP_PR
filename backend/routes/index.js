@@ -11,6 +11,7 @@ const ingresoExcelTr = require('./ingreso-excel.router')
 const solicitudTr = require('./solicitud.router')
 const clienteTr = require('./cliente.router')
 const articuloTr = require('./articulo.router')
+const movimientosTr = require('./movimientos.router')
 
 function routerApi(app){
   const router = express.Router();
@@ -28,6 +29,7 @@ function routerApi(app){
   router.use('/solicitud',solicitudTr )
   router.use('/cliente',clienteTr )
   router.use('/articulo',articuloTr )
+  router.use('/movimientos',movimientosTr )
 
 }
 

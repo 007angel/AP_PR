@@ -31,6 +31,7 @@ class SolicitudService {
       const detalle = await sequelize.models.SolicitudDetalleTr.create({
         solicitudId: solicitud.id,
         articulo: det.articulo,
+        articuloId: det.artuloId || null,
         cantidadSolicitada: det.cantidadSolicitada,
         cantidadEntregada: 0,
         ingresoId: match ? match.ingreso_id : null,
@@ -176,8 +177,10 @@ class SolicitudService {
     });
   }
 
-  async findOne(id) {
-    const solicitud = await sequelize.models.SolicitudTr.findByPk(id, {
+  async findOne(id, companyId) {
+    const where = companyId ? { id, companyId } : { id };
+    const solicitud = await sequelize.models.SolicitudTr.findOne({
+      where,
       include: [
         { model: sequelize.models.SolicitudDetalleTr, as: 'detalles' },
         { model: sequelize.models.UserTr, as: 'user', attributes: ['id', 'name', 'email'] },
@@ -192,23 +195,27 @@ class SolicitudService {
     return plain;
   }
 
-  async updateEstado(id, nuevoEstado) {
-    const solicitud = await sequelize.models.SolicitudTr.findByPk(id);
+  async updateEstado(id, nuevoEstado, companyId) {
+    const where = companyId ? { id, companyId } : { id };
+    const solicitud = await sequelize.models.SolicitudTr.findOne({ where });
     if (!solicitud) return null;
     await solicitud.update({ estado: nuevoEstado });
-    return await this.findOne(id);
+    return await this.findOne(id, companyId);
   }
 
-  async updateDetalleEntrega(detalleId, cantidadEntregada) {
+  async updateDetalleEntrega(detalleId, cantidadEntregada, companyId) {
     const detalle = await sequelize.models.SolicitudDetalleTr.findByPk(detalleId);
     if (!detalle) throw boom.notFound('Detalle de solicitud no encontrado');
+    if (companyId) {
+      const solicitud = await sequelize.models.SolicitudTr.findOne({ where: { id: detalle.solicitudId, companyId } });
+      if (!solicitud) throw boom.notFound('Detalle no pertenece a esta empresa');
+    }
     if (cantidadEntregada < 0) throw boom.badRequest('La cantidad entregada no puede ser negativa');
     if (cantidadEntregada > detalle.cantidadSolicitada) {
       throw boom.badRequest(`La cantidad entregada (${cantidadEntregada}) no puede superar la solicitada (${detalle.cantidadSolicitada})`);
     }
     await detalle.update({ cantidadEntregada });
 
-    // Verificar si la solicitud esta completa
     const solicitud = await sequelize.models.SolicitudTr.findByPk(detalle.solicitudId);
     if (solicitud) {
       const allDetalles = await sequelize.models.SolicitudDetalleTr.findAll({
@@ -226,8 +233,9 @@ class SolicitudService {
     return await sequelize.models.SolicitudDetalleTr.findByPk(detalleId, { raw: true });
   }
 
-  async update(id, changes) {
-    const solicitud = await sequelize.models.SolicitudTr.findByPk(id);
+  async update(id, changes, companyId) {
+    const where = companyId ? { id, companyId } : { id };
+    const solicitud = await sequelize.models.SolicitudTr.findOne({ where });
     if (!solicitud) return null;
 
     if (changes.estado) {
@@ -243,11 +251,12 @@ class SolicitudService {
       }
     }
 
-    return await this.findOne(id);
+    return await this.findOne(id, companyId);
   }
 
-  async delete(id) {
-    const solicitud = await sequelize.models.SolicitudTr.findByPk(id);
+  async delete(id, companyId) {
+    const where = companyId ? { id, companyId } : { id };
+    const solicitud = await sequelize.models.SolicitudTr.findOne({ where });
     if (!solicitud) return null;
     if (solicitud.estado === 'completado') {
       throw boom.conflict('No se puede eliminar una solicitud completada');

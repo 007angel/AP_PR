@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink, Router, ActivatedRoute } from '@angular/router';
 import { IngresoService } from '../../../services/ingreso.service';
+import { ClienteService } from '../../../services/cliente.service';
 import { AuthService } from '../../../services/auth.service';
 import { Ingreso } from '../../../models/ingreso.model';
 
@@ -141,6 +142,18 @@ import { Ingreso } from '../../../models/ingreso.model';
             </div>
 
             <div class="form-row">
+              <div class="form-group">
+                <label for="clienteId">Cliente</label>
+                <select
+                  id="clienteId"
+                  name="clienteId"
+                  [(ngModel)]="ingreso.clienteId"
+                >
+                  <option [ngValue]="null">-- Sin cliente --</option>
+                  <option *ngFor="let c of clientes" [ngValue]="c.id">{{ c.nombre }}</option>
+                </select>
+              </div>
+
               <div class="form-group">
                 <label for="valorTotal">Valor Total ($)</label>
                 <input
@@ -383,15 +396,18 @@ export class IngresoDetailComponent implements OnInit {
   isSaving = false;
   errorMessage = '';
   successMessage = '';
+  clientes: any[] = [];
 
   constructor(
     private ingresoService: IngresoService,
+    private clienteService: ClienteService,
     private authService: AuthService,
     private router: Router,
     private route: ActivatedRoute
   ) {}
 
   ngOnInit() {
+    this.loadClientes();
     this.ingresoId = this.route.snapshot.paramMap.get('id') || '';
     
     if (this.ingresoId && this.ingresoId !== 'new') {
@@ -400,6 +416,14 @@ export class IngresoDetailComponent implements OnInit {
     } else {
       this.initNewIngreso();
     }
+  }
+
+  loadClientes() {
+    const companyId = this.authService.getCompanyId();
+    this.clienteService.findAll(companyId).subscribe({
+      next: (clientes) => this.clientes = clientes,
+      error: () => {}
+    });
   }
 
   initNewIngreso() {
@@ -453,7 +477,8 @@ export class IngresoDetailComponent implements OnInit {
     const ingresoData: any = {
       ...this.ingreso,
       fechaIngreso: new Date(this.ingreso.fechaIngreso),
-      fechaDigitacion: new Date(this.ingreso.fechaDigitacion)
+      fechaDigitacion: new Date(this.ingreso.fechaDigitacion),
+      userRole: this.authService.getUser()?.role || 'user'
     };
 
     if (this.isEditMode) {
@@ -503,6 +528,20 @@ export class IngresoDetailComponent implements OnInit {
     if (!this.ingreso.fechaIngreso) {
       this.errorMessage = 'La fecha de ingreso es requerida';
       return false;
+    }
+    const user = this.authService.getUser();
+    const isAdmin = user?.role === 'master' || user?.role === 'admin';
+    if (!isAdmin) {
+      const fecha = new Date(this.ingreso.fechaIngreso);
+      const hoy = new Date();
+      hoy.setHours(23, 59, 59, 999);
+      const limite = new Date();
+      limite.setDate(limite.getDate() - 15);
+      limite.setHours(0, 0, 0, 0);
+      if (fecha < limite) {
+        this.errorMessage = 'Solo puede registrar ingresos con fecha no mayor a 15 dias. Solicite al administrador.';
+        return false;
+      }
     }
     if (!this.ingreso.fechaDigitacion) {
       this.errorMessage = 'La fecha de digitacion es requerida';

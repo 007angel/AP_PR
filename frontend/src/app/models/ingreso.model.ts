@@ -12,6 +12,8 @@ export interface Ingreso {
   valorTotal?: number;
   companyId?: number;
   userId?: number;
+  clienteId?: number | null;
+  cliente?: any;
   createdAt?: Date | string;
   updatedAt?: Date | string;
 }

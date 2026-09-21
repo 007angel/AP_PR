@@ -24,15 +24,18 @@ const createSolicitudSchema = Joi.object({
   observaciones: observaciones.optional(),
   detalles: Joi.array().items(Joi.object({
     articulo: articulo.required(),
-    cantidadSolicitada: cantidadSolicitada.required()
+    cantidadSolicitada: cantidadSolicitada.required(),
+    articuloId: Joi.number().integer().allow(null).optional(),
+    lote: lote.optional()
   })).min(1).required()
 });
 
 const updateSolicitudSchema = Joi.object({
   estado: estado,
   observaciones: observaciones,
-  cantidadEntregada: cantidadEntregada
-});
+  cantidadEntregada: cantidadEntregada,
+  clienteId: Joi.number().integer().allow(null).optional()
+}).options({ stripUnknown: true });
 
 const getSolicitudSchema = Joi.object({
   id: id.required()

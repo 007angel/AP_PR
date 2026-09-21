@@ -45,7 +45,8 @@ export class UserListComponent implements OnInit {
     { id: 'reports', name: 'Reportes' },
     { id: 'settings', name: 'Configuracion' },
     { id: 'billing', name: 'Facturacion' },
-    { id: 'support', name: 'Soporte' }
+    { id: 'support', name: 'Soporte' },
+    { id: 'anulaciones', name: 'Anulaciones' }
   ];
 
   // Company assignment modal

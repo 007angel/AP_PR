@@ -3,6 +3,7 @@ export interface Anulacion {
   ingresoId: number;
   motivo?: string | null;
   solicitadoPor?: number | null;
+  companyId?: number | null;
   estado: 'pendiente' | 'aprobada' | 'rechazada';
   createdAt?: string;
   updatedAt?: string;

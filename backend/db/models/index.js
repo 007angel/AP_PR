@@ -11,6 +11,7 @@ const {SolicitudTr, SolicitudTrSchema} = require('./solicitud.model')
 const {SolicitudDetalleTr, SolicitudDetalleTrSchema} = require('./solicitud-detalle.model')
 const {ClienteTr, ClienteTrSchema} = require('./cliente.model')
 const {ArticuloTr, ArticuloTrSchema} = require('./articulo.model')
+const {ClienteArticuloTr, ClienteArticuloTrSchema} = require('./cliente-articulo.model')
 
 function setupModels(sequelize){
   UserTr.init(UserTrSchema,UserTr.config(sequelize))
@@ -26,6 +27,7 @@ function setupModels(sequelize){
   SolicitudDetalleTr.init(SolicitudDetalleTrSchema,SolicitudDetalleTr.config(sequelize))
   ClienteTr.init(ClienteTrSchema,ClienteTr.config(sequelize))
   ArticuloTr.init(ArticuloTrSchema,ArticuloTr.config(sequelize))
+  ClienteArticuloTr.init(ClienteArticuloTrSchema,ClienteArticuloTr.config(sequelize))
 
   // Associations
   UserTr.associate(sequelize.models)
@@ -41,6 +43,7 @@ function setupModels(sequelize){
   SolicitudDetalleTr.associate(sequelize.models)
   ClienteTr.associate(sequelize.models)
   ArticuloTr.associate(sequelize.models)
+  ClienteArticuloTr.associate(sequelize.models)
 }
 
 module.exports= setupModels;

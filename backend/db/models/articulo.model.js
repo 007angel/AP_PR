@@ -65,6 +65,7 @@ class ArticuloTr extends Model {
   static associate(models) {
     this.belongsTo(models.CompanyTr, { foreignKey: 'companyId', as: 'company' });
     this.belongsTo(models.UserTr, { foreignKey: 'userId', as: 'user' });
+    this.belongsToMany(models.ClienteTr, { through: models.ClienteArticuloTr, foreignKey: 'articuloId', otherKey: 'clienteId', as: 'clientes' });
   }
 
   static config(sequelize) {

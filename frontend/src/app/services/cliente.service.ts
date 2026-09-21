@@ -38,4 +38,12 @@ export class ClienteService {
     if (companyId) url += `&companyId=${companyId}`;
     return this.http.get<Cliente[]>(url);
   }
+
+  getArticulosByCliente(clienteId: number): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/${clienteId}/articulos`);
+  }
+
+  updateArticulosCliente(clienteId: number, articuloIds: number[]): Observable<any[]> {
+    return this.http.put<any[]>(`${this.apiUrl}/${clienteId}/articulos`, { articuloIds });
+  }
 }

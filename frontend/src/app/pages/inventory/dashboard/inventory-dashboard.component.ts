@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { IngresoService } from '../../../services/ingreso.service';
+import { AuthService } from '../../../services/auth.service';
 import { Ingreso } from '../../../models/ingreso.model';
 
 @Component({
@@ -473,14 +474,15 @@ export class InventoryDashboardComponent implements OnInit {
   recentIngresos: Ingreso[] = [];
   isLoading = true;
 
-  constructor(private ingresoService: IngresoService) {}
+  constructor(private ingresoService: IngresoService, private authService: AuthService) {}
 
   ngOnInit() {
     this.loadStats();
   }
 
   loadStats() {
-    this.ingresoService.getStats().subscribe({
+    const companyId = this.authService.getCompanyId() || undefined;
+    this.ingresoService.getStats(companyId).subscribe({
       next: (stats) => {
         this.stats = stats;
         this.loadRecentIngresos();
@@ -492,7 +494,8 @@ export class InventoryDashboardComponent implements OnInit {
   }
 
   loadRecentIngresos() {
-    this.ingresoService.getRecent(5).subscribe({
+    const companyId = this.authService.getCompanyId() || undefined;
+    this.ingresoService.getRecent(5, companyId).subscribe({
       next: (ingresos) => {
         this.recentIngresos = ingresos.filter(i => i.status !== 'anulado');
         this.isLoading = false;

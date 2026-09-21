@@ -41,7 +41,8 @@ router.get('/:id',
   async (req, res, next) => {
     try {
       const { id } = req.params;
-      const cliente = await service.findOne(id);
+      const companyId = req.query.companyId ? parseInt(req.query.companyId) : null;
+      const cliente = await service.findOne(id, companyId);
       if (!cliente) {
         return res.status(404).json({ message: 'Cliente no encontrado' });
       }
@@ -70,7 +71,8 @@ router.put('/:id',
   async (req, res, next) => {
     try {
       const { id } = req.params;
-      const cliente = await service.update(id, req.body);
+      const companyId = req.body.companyId || req.query.companyId ? parseInt(req.body.companyId || req.query.companyId) : null;
+      const cliente = await service.update(id, req.body, companyId);
       if (!cliente) {
         return res.status(404).json({ message: 'Cliente no encontrado' });
       }
@@ -86,11 +88,41 @@ router.delete('/:id',
   async (req, res, next) => {
     try {
       const { id } = req.params;
-      const result = await service.delete(id);
+      const companyId = req.query.companyId ? parseInt(req.query.companyId) : null;
+      const result = await service.delete(id, companyId);
       if (!result) {
         return res.status(404).json({ message: 'Cliente no encontrado' });
       }
       res.json({ message: 'Cliente eliminado', id: result.id });
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
+router.get('/:id/articulos',
+  validatorHandler(getClienteSchema, 'params'),
+  async (req, res, next) => {
+    try {
+      const { id } = req.params;
+      const companyId = req.query.companyId ? parseInt(req.query.companyId) : null;
+      const articulos = await service.getArticulosByCliente(id, companyId);
+      res.json(articulos);
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
+router.put('/:id/articulos',
+  validatorHandler(getClienteSchema, 'params'),
+  async (req, res, next) => {
+    try {
+      const { id } = req.params;
+      const { articuloIds, companyId } = req.body;
+      const cid = companyId ? parseInt(companyId) : (req.query.companyId ? parseInt(req.query.companyId) : null);
+      const articulos = await service.syncArticulos(id, articuloIds || [], cid);
+      res.json(articulos);
     } catch (error) {
       next(error);
     }

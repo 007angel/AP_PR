@@ -43,6 +43,18 @@ router.post('/upload/:companyId', upload.single('archivo'), async (req, res, nex
 
     const companyId = parseInt(req.params.companyId) || null;
     const userId = req.body.userId ? parseInt(req.body.userId) : null;
+    const userRole = req.body.userRole || 'user';
+    if (userRole !== 'master' && userRole !== 'admin') {
+      const limite = new Date();
+      limite.setDate(limite.getDate() - 15);
+      limite.setHours(0, 0, 0, 0);
+      if (req.body.fechaIngreso) {
+        const fecha = new Date(req.body.fechaIngreso);
+        if (fecha < limite) {
+          return res.status(400).json({ message: 'Solo puede registrar ingresos con fecha no mayor a 15 dias. Solicite al administrador.' });
+        }
+      }
+    }
 
     const result = await service.parseAndCreate(req.file.buffer, companyId, userId);
     res.status(201).json(result);

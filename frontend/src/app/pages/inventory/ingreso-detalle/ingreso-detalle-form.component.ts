@@ -6,6 +6,7 @@ import { IngresoDetalleService } from '../../../services/ingreso-detalle.service
 import { SolicitudService } from '../../../services/solicitud.service';
 import { ArticuloService } from '../../../services/articulo.service';
 import { IngresoService } from '../../../services/ingreso.service';
+import { ClienteService } from '../../../services/cliente.service';
 import { AuthService } from '../../../services/auth.service';
 import { ConfirmDialogComponent } from '../../../shared/confirm-dialog/confirm-dialog.component';
 import { ConfirmService } from '../../../shared/confirm-dialog/confirm.service';
@@ -81,7 +82,7 @@ import { Articulo } from '../../../models/articulo.model';
             <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
             <polyline points="22 4 12 14.01 9 11.01"></polyline>
           </svg>
-          Ingreso completo: todas las tarimas fueron asignadas. No se permiten agregar, modificar ni eliminar lineas.
+          Ingreso completado: sin articulos disponibles. Redirigiendo al listado...
         </div>
 
         <div class="form-card" *ngIf="!ingresoCompleto">
@@ -90,25 +91,6 @@ import { Articulo } from '../../../models/articulo.model';
           </div>
           <div class="card-body">
             <form (ngSubmit)="onSubmit()">
-              <div class="foto-section">
-                <div class="foto-preview">
-                  <img [src]="formData.foto || fotoPlaceholder" alt="Foto del articulo">
-                </div>
-                <div class="foto-info">
-                  <label>Foto del Articulo</label>
-                  <p class="foto-hint">{{ formData.foto ? 'Foto cargada por el usuario' : 'Sin foto: se muestra imagen recomendada' }}</p>
-                  <div class="foto-actions">
-                    <input type="file" #fotoInput accept="image/*" (change)="onFotoSelected($event)" hidden>
-                    <button type="button" (click)="fotoInput.click()" class="btn btn-secondary btn-sm">
-                      {{ formData.foto ? 'Cambiar foto' : 'Cargar foto' }}
-                    </button>
-                    <button type="button" (click)="removeFoto()" class="btn btn-secondary btn-sm" *ngIf="formData.foto">
-                      Quitar
-                    </button>
-                  </div>
-                  <span class="field-error" *ngIf="formErrors['foto']">{{ formErrors['foto'] }}</span>
-                </div>
-              </div>
               <div class="form-grid">
                 <div class="form-group">
                   <label>Lote *</label>
@@ -117,7 +99,7 @@ import { Articulo } from '../../../models/articulo.model';
                 </div>
 
                 <div class="form-group">
-                  <label>Articulo *</label>
+                  <label>Articulo * <span class="label-hint" *ngIf="ingreso?.clienteId">(del cliente)</span></label>
                   <div class="articulo-autocomplete">
                     <input
                       type="text"
@@ -129,26 +111,38 @@ import { Articulo } from '../../../models/articulo.model';
                       (focus)="showArticuloDropdown = true"
                       (blur)="hideArticuloDropdown()"
                     />
-                    <div class="articulo-dropdown" *ngIf="showArticuloDropdown && articulosFiltered.length > 0">
-                      <div
-                        *ngFor="let a of articulosFiltered"
-                        class="articulo-option"
-                        (mousedown)="selectArticulo(a)"
-                      >
-                        <div class="option-foto" *ngIf="a.foto">
-                          <img [src]="a.foto" [alt]="a.nombre" />
+                    <div class="articulo-dropdown" *ngIf="showArticuloDropdown">
+                      <div *ngIf="articulosFiltered.length > 0">
+                        <div
+                          *ngFor="let a of articulosFiltered"
+                          class="articulo-option"
+                          (mousedown)="selectArticulo(a)"
+                        >
+                          <div class="option-foto" *ngIf="a.foto">
+                            <img [src]="a.foto" [alt]="a.nombre" />
+                          </div>
+                          <div class="option-foto option-placeholder" *ngIf="!a.foto">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                              <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                              <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                              <polyline points="21 15 16 10 5 21"></polyline>
+                            </svg>
+                          </div>
+                          <div class="option-info">
+                            <span class="option-nombre">{{ a.nombre }}</span>
+                            <span class="option-meta" *ngIf="a.codigo">{{ a.codigo }}</span>
+                          </div>
                         </div>
-                        <div class="option-foto option-placeholder" *ngIf="!a.foto">
-                          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-                            <circle cx="8.5" cy="8.5" r="1.5"></circle>
-                            <polyline points="21 15 16 10 5 21"></polyline>
-                          </svg>
-                        </div>
-                        <div class="option-info">
-                          <span class="option-nombre">{{ a.nombre }}</span>
-                          <span class="option-meta" *ngIf="a.codigo">{{ a.codigo }}</span>
-                        </div>
+                      </div>
+                      <div *ngIf="articulosFiltered.length === 0 && articuloSearch.trim().length >= 2" class="articulo-empty">
+                        <span>Sin resultados para "{{ articuloSearch }}"</span>
+                      </div>
+                      <div *ngIf="articuloSearch.trim().length >= 2" class="articulo-create" (mousedown)="quickCreateArticulo()">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                          <line x1="12" y1="5" x2="12" y2="19"></line>
+                          <line x1="5" y1="12" x2="19" y2="12"></line>
+                        </svg>
+                        <span>Crear "{{ articuloSearch.trim() }}"</span>
                       </div>
                     </div>
                   </div>
@@ -223,7 +217,6 @@ import { Articulo } from '../../../models/articulo.model';
               <table>
                 <thead>
                   <tr>
-                    <th>Foto</th>
                     <th>Lote</th>
                     <th>Articulo</th>
                     <th>Tarima</th>
@@ -239,7 +232,6 @@ import { Articulo } from '../../../models/articulo.model';
                 </thead>
                 <tbody>
                   <tr *ngFor="let detalle of detalles">
-                    <td><img [src]="detalle.foto || fotoPlaceholder" alt="Foto" class="thumb"></td>
                     <td>{{ detalle.lote }}</td>
                     <td>{{ detalle.articulo }}</td>
                     <td>{{ detalle.tarima }}</td>
@@ -503,66 +495,6 @@ import { Articulo } from '../../../models/articulo.model';
       margin-bottom: 24px;
     }
 
-    .foto-section {
-      display: flex;
-      gap: 20px;
-      align-items: flex-start;
-      margin-bottom: 24px;
-      padding: 16px;
-      background: var(--bg-tertiary);
-      border: 1px dashed var(--border-primary);
-      border-radius: var(--radius-md);
-    }
-
-    .foto-preview {
-      flex-shrink: 0;
-
-      img {
-        width: 160px;
-        height: 120px;
-        object-fit: cover;
-        border-radius: var(--radius-md);
-        border: 1px solid var(--border-primary);
-        background: var(--bg-secondary);
-      }
-    }
-
-    .foto-info {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-
-      label {
-        font-size: 13px;
-        font-weight: 500;
-        color: var(--text-secondary);
-      }
-
-      .foto-hint {
-        font-size: 12px;
-        color: var(--text-tertiary);
-        margin: 0;
-      }
-
-      .foto-actions {
-        display: flex;
-        gap: 8px;
-      }
-
-      .btn-sm {
-        padding: 8px 14px;
-        font-size: 13px;
-      }
-    }
-
-    .thumb {
-      width: 48px;
-      height: 36px;
-      object-fit: cover;
-      border-radius: 4px;
-      border: 1px solid var(--border-primary);
-    }
-
     .form-group {
       display: flex;
       flex-direction: column;
@@ -715,6 +647,13 @@ import { Articulo } from '../../../models/articulo.model';
       margin-top: 4px;
     }
 
+    .label-hint {
+      font-weight: 400;
+      font-size: 12px;
+      color: var(--accent-primary);
+      font-style: italic;
+    }
+
     .notice-banner {
       display: flex;
       align-items: center;
@@ -757,9 +696,12 @@ import { Articulo } from '../../../models/articulo.model';
 
     /* Articulo Autocomplete */
     .articulo-autocomplete { position: relative; }
-    .articulo-dropdown { position: absolute; top: 100%; left: 0; right: 0; z-index: 200; background: var(--bg-primary); border: 1px solid var(--border-primary); border-radius: 0 0 var(--radius-md) var(--radius-md); max-height: 240px; overflow-y: auto; box-shadow: 0 8px 24px rgba(0,0,0,0.12); }
+    .articulo-dropdown { position: absolute; top: 100%; left: 0; right: 0; z-index: 200; background: var(--bg-primary); border: 1px solid var(--border-primary); border-radius: 0 0 var(--radius-md) var(--radius-md); max-height: 280px; overflow-y: auto; box-shadow: 0 8px 24px rgba(0,0,0,0.12); }
     .articulo-option { display: flex; align-items: center; gap: 10px; padding: 8px 12px; cursor: pointer; transition: background 0.15s; }
     .articulo-option:hover { background: var(--bg-tertiary); }
+    .articulo-empty { padding: 10px 12px; font-size: 13px; color: var(--text-tertiary); }
+    .articulo-create { display: flex; align-items: center; gap: 8px; padding: 10px 12px; font-size: 13px; font-weight: 600; color: var(--accent-primary); background: var(--accent-bg); border-top: 1px solid var(--border-primary); cursor: pointer; transition: background 0.15s; }
+    .articulo-create:hover { background: var(--accent-primary); color: white; }
     .option-foto { width: 36px; height: 36px; border-radius: 6px; overflow: hidden; flex-shrink: 0; background: var(--bg-tertiary); display: flex; align-items: center; justify-content: center; color: var(--text-muted); }
     .option-foto img { width: 100%; height: 100%; object-fit: cover; }
     .option-info { display: flex; flex-direction: column; min-width: 0; }
@@ -822,7 +764,6 @@ export class IngresoDetalleFormComponent implements OnInit {
   showArticuloDropdown = false;
 
   formErrors: { [key: string]: string } = {};
-  fotoPlaceholder = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='120' viewBox='0 0 160 120'%3E%3Crect width='160' height='120' fill='%23343a40'/%3E%3Ccircle cx='80' cy='48' r='16' fill='none' stroke='%23adb5bd' stroke-width='3'/%3E%3Cpath d='M40 108 L64 76 L88 100 L100 88 L122 108 Z' fill='none' stroke='%23adb5bd' stroke-width='3'/%3E%3C/svg%3E";
   noticeMessage: string | null = null;
   private noticeTimeout: any = null;
 
@@ -870,6 +811,7 @@ export class IngresoDetalleFormComponent implements OnInit {
     private solicitudService: SolicitudService,
     private articuloService: ArticuloService,
     private ingresoService: IngresoService,
+    private clienteService: ClienteService,
     private authService: AuthService,
     private confirmService: ConfirmService
   ) {}
@@ -888,15 +830,10 @@ export class IngresoDetalleFormComponent implements OnInit {
     this.isLoading = true;
     this.error = null;
 
-    const companyId = this.authService.getCompanyId();
-    this.articuloService.findAll(companyId).subscribe({
-      next: (arts) => { this.articulosCatalogo = arts; },
-      error: () => {}
-    });
-
     this.ingresoService.findOne(this.ingresoId).subscribe({
       next: (ingreso) => {
         this.ingreso = ingreso;
+        this.loadArticulos();
         this.loadDetalles();
       },
       error: () => {
@@ -904,6 +841,35 @@ export class IngresoDetalleFormComponent implements OnInit {
         this.isLoading = false;
       }
     });
+  }
+
+  loadArticulos() {
+    const companyId = this.authService.getCompanyId();
+    if (this.ingreso?.clienteId) {
+      this.clienteService.getArticulosByCliente(this.ingreso.clienteId).subscribe({
+        next: (arts) => {
+          this.articulosCatalogo = arts;
+          this.articulosFiltered = arts.slice(0, 20);
+        },
+        error: () => {
+          this.articuloService.findAll(companyId).subscribe({
+            next: (arts) => {
+              this.articulosCatalogo = arts;
+              this.articulosFiltered = arts.slice(0, 20);
+            },
+            error: () => {}
+          });
+        }
+      });
+    } else {
+      this.articuloService.findAll(companyId).subscribe({
+        next: (arts) => {
+          this.articulosCatalogo = arts;
+          this.articulosFiltered = arts.slice(0, 20);
+        },
+        error: () => {}
+      });
+    }
   }
 
   loadDetalles() {
@@ -924,6 +890,12 @@ export class IngresoDetalleFormComponent implements OnInit {
       next: (solicitudes) => {
         this.solicitudesVinculadas = solicitudes;
         this.isLoading = false;
+        if (this.ingresoCompleto) {
+          this.showNotice('Ingreso completado: sin articulos disponibles. Redirigiendo...');
+          setTimeout(() => {
+            this.router.navigate(['/inventory/ingreso']);
+          }, 2500);
+        }
       },
       error: () => {
         this.solicitudesVinculadas = [];
@@ -980,11 +952,28 @@ export class IngresoDetalleFormComponent implements OnInit {
   selectArticulo(articulo: Articulo) {
     this.formData.articulo = articulo.nombre;
     this.formData.articuloId = articulo.id!;
-    if (articulo.foto && !this.formData.foto) {
-      this.formData.foto = articulo.foto;
-    }
     this.articuloSearch = articulo.nombre;
     this.showArticuloDropdown = false;
+  }
+
+  quickCreateArticulo() {
+    const nombre = this.articuloSearch.trim();
+    if (!nombre || nombre.length < 2) return;
+    const companyId = this.authService.getCompanyId();
+    const userId = this.authService.getUser()?.id;
+    const payload: any = { nombre };
+    if (companyId) payload.companyId = companyId;
+    if (userId) payload.userId = userId;
+    this.articuloService.create(payload).subscribe({
+      next: (nuevo) => {
+        this.articulosCatalogo.push(nuevo);
+        this.selectArticulo(nuevo);
+        this.showNotice('Articulo "' + nombre + '" creado');
+      },
+      error: (err) => {
+        this.error = err.error?.message || 'Error al crear articulo';
+      }
+    });
   }
 
   hideArticuloDropdown() {
@@ -1005,36 +994,8 @@ export class IngresoDetalleFormComponent implements OnInit {
       entregado: 0,
       mermas: 0,
       devolucion: 0,
-      costoIndividual: 0,
-      foto: ''
+      costoIndividual: 0
     };
-  }
-
-  onFotoSelected(event: Event) {
-    const input = event.target as HTMLInputElement;
-    const file = input.files && input.files[0];
-    input.value = '';
-    if (!file) {
-      return;
-    }
-    delete this.formErrors['foto'];
-    if (!file.type.startsWith('image/')) {
-      this.formErrors['foto'] = 'El archivo debe ser una imagen';
-      return;
-    }
-    if (file.size > 2 * 1024 * 1024) {
-      this.formErrors['foto'] = 'La foto no debe superar 2 MB';
-      return;
-    }
-    const reader = new FileReader();
-    reader.onload = () => {
-      this.formData.foto = reader.result as string;
-    };
-    reader.readAsDataURL(file);
-  }
-
-  removeFoto() {
-    this.formData.foto = '';
   }
 
   onSubmit() {
@@ -1053,13 +1014,34 @@ export class IngresoDetalleFormComponent implements OnInit {
     this.formData.userId = this.authService.getUser()?.id || null;
     this.isSaving = true;
 
-    if (this.editingId) {
-      this.ingresoDetalleService.update(this.editingId, this.formData).subscribe({
-        next: () => {
+    const onSuccess = () => {
+      this.ingresoService.findOne(this.ingresoId).subscribe({
+        next: (ingresoActualizado) => {
+          this.ingreso = ingresoActualizado;
+          if (ingresoActualizado.status === 'completado') {
+            this.loadData();
+            this.isSaving = false;
+            this.showNotice('Ingreso completado: sin articulos disponibles. Redirigiendo...');
+            setTimeout(() => {
+              this.router.navigate(['/inventory/ingreso']);
+            }, 1800);
+          } else {
+            this.loadData();
+            this.resetForm();
+            this.isSaving = false;
+          }
+        },
+        error: () => {
           this.loadData();
           this.resetForm();
           this.isSaving = false;
-        },
+        }
+      });
+    };
+
+    if (this.editingId) {
+      this.ingresoDetalleService.update(this.editingId, this.formData).subscribe({
+        next: onSuccess,
         error: () => {
           this.loadData();
           this.isSaving = false;
@@ -1067,11 +1049,7 @@ export class IngresoDetalleFormComponent implements OnInit {
       });
     } else {
       this.ingresoDetalleService.create(this.formData).subscribe({
-        next: () => {
-          this.loadData();
-          this.resetForm();
-          this.isSaving = false;
-        },
+        next: onSuccess,
         error: () => {
           this.loadData();
           this.isSaving = false;

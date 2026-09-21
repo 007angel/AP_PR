@@ -11,23 +11,27 @@ export class AnulacionService {
 
   constructor(private http: HttpClient) { }
 
-  findAll(): Observable<Anulacion[]> {
-    return this.http.get<Anulacion[]>(this.apiUrl);
+  findAll(companyId?: number | null): Observable<Anulacion[]> {
+    const params: any = {};
+    if (companyId) params.companyId = companyId;
+    return this.http.get<Anulacion[]>(this.apiUrl, { params });
   }
 
-  create(data: { ingresoId: number; motivo?: string | null; solicitadoPor?: number | null }): Observable<Anulacion> {
+  create(data: { ingresoId: number; motivo?: string | null; solicitadoPor?: number | null; companyId?: number | null }): Observable<Anulacion> {
     return this.http.post<Anulacion>(this.apiUrl, data);
   }
 
-  aprobar(id: number): Observable<Anulacion> {
-    return this.http.post<Anulacion>(`${this.apiUrl}/${id}/aprobar`, {});
+  aprobar(id: number, companyId?: number | null): Observable<Anulacion> {
+    return this.http.post<Anulacion>(`${this.apiUrl}/${id}/aprobar`, { companyId });
   }
 
-  rechazar(id: number): Observable<Anulacion> {
-    return this.http.post<Anulacion>(`${this.apiUrl}/${id}/rechazar`, {});
+  rechazar(id: number, companyId?: number | null): Observable<Anulacion> {
+    return this.http.post<Anulacion>(`${this.apiUrl}/${id}/rechazar`, { companyId });
   }
 
-  delete(id: number): Observable<{ message: string; id: number }> {
-    return this.http.delete<{ message: string; id: number }>(`${this.apiUrl}/${id}`);
+  delete(id: number, companyId?: number | null): Observable<{ message: string; id: number }> {
+    const params: any = {};
+    if (companyId) params.companyId = companyId;
+    return this.http.delete<{ message: string; id: number }>(`${this.apiUrl}/${id}`, { params });
   }
 }

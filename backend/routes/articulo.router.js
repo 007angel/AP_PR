@@ -41,7 +41,8 @@ router.get('/:id',
   async (req, res, next) => {
     try {
       const { id } = req.params;
-      const articulo = await service.findOne(id);
+      const companyId = req.query.companyId ? parseInt(req.query.companyId) : null;
+      const articulo = await service.findOne(id, companyId);
       if (!articulo) {
         return res.status(404).json({ message: 'Artículo no encontrado' });
       }
@@ -70,7 +71,8 @@ router.put('/:id',
   async (req, res, next) => {
     try {
       const { id } = req.params;
-      const articulo = await service.update(id, req.body);
+      const companyId = req.body.companyId || req.query.companyId ? parseInt(req.body.companyId || req.query.companyId) : null;
+      const articulo = await service.update(id, req.body, companyId);
       if (!articulo) {
         return res.status(404).json({ message: 'Artículo no encontrado' });
       }
@@ -86,7 +88,8 @@ router.delete('/:id',
   async (req, res, next) => {
     try {
       const { id } = req.params;
-      const result = await service.delete(id);
+      const companyId = req.query.companyId ? parseInt(req.query.companyId) : null;
+      const result = await service.delete(id, companyId);
       if (!result) {
         return res.status(404).json({ message: 'Artículo no encontrado' });
       }

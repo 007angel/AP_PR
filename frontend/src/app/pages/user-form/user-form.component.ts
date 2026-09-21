@@ -37,7 +37,8 @@ export class UserFormComponent implements OnInit {
     { id: 'reports', name: 'Reportes', icon: '📈', description: 'Generación de informes' },
     { id: 'settings', name: 'Configuración', icon: '⚙️', description: 'Ajustes del sistema' },
     { id: 'billing', name: 'Facturación', icon: '💳', description: 'Gestión de pagos' },
-    { id: 'support', name: 'Soporte', icon: '🛠️', description: 'Centro de ayuda' }
+    { id: 'support', name: 'Soporte', icon: '🛠️', description: 'Centro de ayuda' },
+    { id: 'anulaciones', name: 'Anulaciones', icon: '🚫', description: 'Aprobar/rechazar solicitudes de anulación' }
   ];
 
   constructor(

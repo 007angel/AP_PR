@@ -784,7 +784,8 @@ export class ExcelUploadComponent {
     if (!this.selectedFile || this.isUploading) return;
 
     this.isUploading = true;
-    this.excelService.uploadExcel(this.selectedFile, this.companyId).subscribe({
+    const user = this.authService.getUser();
+    this.excelService.uploadExcel(this.selectedFile, this.companyId, user?.id, user?.role).subscribe({
       next: (result) => {
         this.isUploading = false;
         this.uploadResult = result;

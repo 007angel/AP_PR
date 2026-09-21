@@ -24,20 +24,23 @@ class ClienteService {
     return clientes;
   }
 
-  async findOne(id) {
-    const cliente = await sequelize.models.ClienteTr.findByPk(id, { raw: true });
+  async findOne(id, companyId) {
+    const where = companyId ? { id, companyId } : { id };
+    const cliente = await sequelize.models.ClienteTr.findOne({ where, raw: true });
     return cliente;
   }
 
-  async update(id, changes) {
-    const cliente = await sequelize.models.ClienteTr.findByPk(id);
+  async update(id, changes, companyId) {
+    const where = companyId ? { id, companyId } : { id };
+    const cliente = await sequelize.models.ClienteTr.findOne({ where });
     if (!cliente) return null;
     await cliente.update(changes);
-    return await this.findOne(id);
+    return await this.findOne(id, companyId);
   }
 
-  async delete(id) {
-    const cliente = await sequelize.models.ClienteTr.findByPk(id);
+  async delete(id, companyId) {
+    const where = companyId ? { id, companyId } : { id };
+    const cliente = await sequelize.models.ClienteTr.findOne({ where });
     if (!cliente) return null;
     await cliente.destroy();
     return { id };
@@ -58,6 +61,22 @@ class ClienteService {
       (c.rif && c.rif.toLowerCase().includes(lower)) ||
       (c.email && c.email.toLowerCase().includes(lower))
     );
+  }
+
+  async getArticulosByCliente(clienteId, companyId) {
+    const where = companyId ? { id: clienteId, companyId } : { id: clienteId };
+    const cliente = await sequelize.models.ClienteTr.findOne({ where });
+    if (!cliente) throw boom.notFound('Cliente no encontrado');
+    const articulos = await cliente.getArticulos({ joinTableAttributes: [], raw: true, nest: true });
+    return articulos;
+  }
+
+  async syncArticulos(clienteId, articuloIds, companyId) {
+    const where = companyId ? { id: clienteId, companyId } : { id: clienteId };
+    const cliente = await sequelize.models.ClienteTr.findOne({ where });
+    if (!cliente) throw boom.notFound('Cliente no encontrado');
+    await cliente.setArticulos(articuloIds);
+    return await this.getArticulosByCliente(clienteId, companyId);
   }
 }
 

@@ -46,6 +46,12 @@ const SolicitudDetalleTrSchema = {
     allowNull: true,
     type: DataTypes.STRING(50)
   },
+  articuloId: {
+    allowNull: true,
+    type: DataTypes.INTEGER,
+    field: 'articulo_id',
+    references: { model: 'articulo_tr', key: 'id' }
+  },
   companyId: {
     allowNull: true,
     type: DataTypes.INTEGER,

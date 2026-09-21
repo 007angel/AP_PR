@@ -8,7 +8,8 @@ const service = new IngresoDetalleTrService();
 
 router.get('/', async (req, res, next) => {
   try {
-    const detalles = await service.find();
+    const companyId = req.query.companyId ? parseInt(req.query.companyId) : null;
+    const detalles = await service.find(companyId);
     res.json(detalles);
   } catch (error) {
     next(error);
@@ -18,7 +19,8 @@ router.get('/', async (req, res, next) => {
 router.get('/:id', validatorHandler(getIngresoDetalleSchema, 'params'), async (req, res, next) => {
   try {
     const { id } = req.params;
-    const detalle = await service.findOne(id);
+    const companyId = req.query.companyId ? parseInt(req.query.companyId) : null;
+    const detalle = await service.findOne(id, companyId);
     if (!detalle) {
       res.status(404).json({ message: 'Detalle no encontrado' });
     } else {
@@ -32,7 +34,8 @@ router.get('/:id', validatorHandler(getIngresoDetalleSchema, 'params'), async (r
 router.get('/ingreso/:ingresoId', async (req, res, next) => {
   try {
     const { ingresoId } = req.params;
-    const detalles = await service.findByIngreso(ingresoId);
+    const companyId = req.query.companyId ? parseInt(req.query.companyId) : null;
+    const detalles = await service.findByIngreso(ingresoId, companyId);
     res.json(detalles);
   } catch (error) {
     next(error);
@@ -53,7 +56,8 @@ router.put('/:id', validatorHandler(getIngresoDetalleSchema, 'params'), validato
   try {
     const { id } = req.params;
     const body = req.body;
-    const detalle = await service.update(id, body);
+    const companyId = body.companyId || req.query.companyId ? parseInt(body.companyId || req.query.companyId) : null;
+    const detalle = await service.update(id, body, companyId);
     if (!detalle) {
       res.status(404).json({ message: 'Detalle no encontrado' });
     } else {
@@ -67,7 +71,8 @@ router.put('/:id', validatorHandler(getIngresoDetalleSchema, 'params'), validato
 router.delete('/:id', validatorHandler(getIngresoDetalleSchema, 'params'), async (req, res, next) => {
   try {
     const { id } = req.params;
-    const result = await service.delete(id);
+    const companyId = req.query.companyId ? parseInt(req.query.companyId) : null;
+    const result = await service.delete(id, companyId);
     if (!result) {
       res.status(404).json({ message: 'Detalle no encontrado' });
     } else {
@@ -81,8 +86,13 @@ router.delete('/:id', validatorHandler(getIngresoDetalleSchema, 'params'), async
 router.delete('/ingreso/:ingresoId', async (req, res, next) => {
   try {
     const { ingresoId } = req.params;
-    const result = await service.deleteByIngreso(ingresoId);
-    res.json(result);
+    const companyId = req.query.companyId ? parseInt(req.query.companyId) : null;
+    const result = await service.deleteByIngreso(ingresoId, companyId);
+    if (!result) {
+      res.status(404).json({ message: 'Ingreso no encontrado' });
+    } else {
+      res.json(result);
+    }
   } catch (error) {
     next(error);
   }

@@ -50,6 +50,7 @@ router.get('/by-ingreso/:ingresoId',
   async (req, res, next) => {
     try {
       const { ingresoId } = req.params;
+      const companyId = req.query.companyId ? parseInt(req.query.companyId) : null;
       const solicitudes = await service.findByIngreso(parseInt(ingresoId));
       res.json(solicitudes);
     } catch (error) {
@@ -63,7 +64,8 @@ router.get('/:id',
   async (req, res, next) => {
     try {
       const { id } = req.params;
-      const solicitud = await service.findOne(id);
+      const companyId = req.query.companyId ? parseInt(req.query.companyId) : null;
+      const solicitud = await service.findOne(id, companyId);
       if (!solicitud) {
         return res.status(404).json({ message: 'Solicitud no encontrada' });
       }
@@ -93,7 +95,8 @@ router.put('/:id',
     try {
       const { id } = req.params;
       const changes = req.body;
-      const solicitud = await service.update(id, changes);
+      const companyId = changes.companyId || req.query.companyId ? parseInt(changes.companyId || req.query.companyId) : null;
+      const solicitud = await service.update(id, changes, companyId);
       if (!solicitud) {
         return res.status(404).json({ message: 'Solicitud no encontrada' });
       }
@@ -109,11 +112,12 @@ router.patch('/:id/estado',
   async (req, res, next) => {
     try {
       const { id } = req.params;
-      const { estado } = req.body;
+      const { estado, companyId } = req.body;
       if (!estado) {
         return res.status(400).json({ message: 'El campo estado es requerido' });
       }
-      const solicitud = await service.updateEstado(id, estado);
+      const cid = companyId ? parseInt(companyId) : (req.query.companyId ? parseInt(req.query.companyId) : null);
+      const solicitud = await service.updateEstado(id, estado, cid);
       if (!solicitud) {
         return res.status(404).json({ message: 'Solicitud no encontrada' });
       }
@@ -128,11 +132,12 @@ router.patch('/detalle/:detalleId',
   async (req, res, next) => {
     try {
       const { detalleId } = req.params;
-      const { cantidadEntregada } = req.body;
+      const { cantidadEntregada, companyId } = req.body;
       if (cantidadEntregada === undefined) {
         return res.status(400).json({ message: 'El campo cantidadEntregada es requerido' });
       }
-      const result = await service.updateDetalleEntrega(parseInt(detalleId), parseInt(cantidadEntregada));
+      const cid = companyId ? parseInt(companyId) : (req.query.companyId ? parseInt(req.query.companyId) : null);
+      const result = await service.updateDetalleEntrega(parseInt(detalleId), parseInt(cantidadEntregada), cid);
       res.json(result);
     } catch (error) {
       next(error);
@@ -145,7 +150,8 @@ router.delete('/:id',
   async (req, res, next) => {
     try {
       const { id } = req.params;
-      const result = await service.delete(id);
+      const companyId = req.query.companyId ? parseInt(req.query.companyId) : null;
+      const result = await service.delete(id, companyId);
       if (!result) {
         return res.status(404).json({ message: 'Solicitud no encontrada' });
       }

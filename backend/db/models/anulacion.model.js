@@ -36,6 +36,15 @@ const AnulacionTrSchema={
     type:DataTypes.STRING,
     defaultValue:'pendiente'
   },
+  companyId:{
+    allowNull:true,
+    type:DataTypes.INTEGER,
+    field:'company_id',
+    references:{
+      model:'company_tr',
+      key:'id'
+    }
+  },
   createdAt:{
     allowNull:false,
     type:DataTypes.DATE,

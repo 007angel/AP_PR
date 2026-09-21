@@ -10,6 +10,7 @@ import { CompanyFormComponent } from './pages/company-form/company-form.componen
 import { ModuloListComponent } from './pages/modulo-list/modulo-list.component';
 import { ModuloFormComponent } from './pages/modulo-form/modulo-form.component';
 import { AnulacionListComponent } from './pages/anulacion-list/anulacion-list.component';
+
 import { AuthGuard } from './guards/auth.guard';
 import { RoleGuard } from './guards/role.guard';
 
@@ -56,10 +57,11 @@ export const routes: Routes = [
       { path: 'dashboard', component: InventoryDashboardComponent },
       { path: 'ingreso', component: IngresoListComponent },
       { path: 'ingreso/new', component: IngresoDetailComponent },
-      { path: 'ingreso/:id', component: IngresoDetailComponent },
-      { path: 'ingreso/:ingresoId/detalle', component: IngresoDetalleFormComponent },
       { path: 'ingreso/movimientos', component: MovimientoDetailComponent },
       { path: 'ingreso/movimientos/:id', component: MovimientoDetailComponent },
+      { path: 'movimientos', component: MovimientoDetailComponent },
+      { path: 'ingreso/:ingresoId/detalle', component: IngresoDetalleFormComponent },
+      { path: 'ingreso/:id', component: IngresoDetailComponent },
       { path: 'salida', component: SalidaListComponent },
       { path: 'salida/new', component: SalidaDetailComponent },
       { path: 'salida/:id', component: SalidaDetailComponent },
@@ -68,6 +70,7 @@ export const routes: Routes = [
       { path: 'solicitudes/:id', component: SolicitudesDetailComponent },
       { path: 'clientes', component: ClienteListComponent },
       { path: 'articulos', component: ArticuloListComponent },
+      { path: 'anulaciones', component: AnulacionListComponent },
       { path: 'reportes', redirectTo: 'reportes/movimientos', pathMatch: 'full' },
       { path: 'reportes/movimientos', component: ReporteMovimientosComponent },
       { path: 'reportes/ingresos', component: ReporteIngresosComponent },

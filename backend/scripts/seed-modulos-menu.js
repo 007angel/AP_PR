@@ -4,12 +4,13 @@ const c = new Client({ host: 'localhost', port: 5432, database: 'postgres', user
 const modulos = [
   { nombre: 'Dashboard', ruta: '/inventory/dashboard', icono: '📊', orden: 1, seccion: null, descripcion: 'Panel principal del inventario' },
   { nombre: 'Ingresos', ruta: '/inventory/ingreso', icono: '📥', orden: 2, seccion: 'Ingresos', descripcion: 'Registro de ingresos al inventario' },
-  { nombre: 'Movimientos', ruta: '/inventory/ingreso/movimientos', icono: '📈', orden: 3, seccion: 'Ingresos', descripcion: 'Movimientos de inventario' },
+  { nombre: 'Movimientos', ruta: '/inventory/movimientos', icono: '📈', orden: 3, seccion: 'Inventario', descripcion: 'Movimientos de inventario' },
   { nombre: 'Salidas', ruta: '/inventory/salida', icono: '📤', orden: 4, seccion: 'Salidas', descripcion: 'Registro de salidas del inventario' },
   { nombre: 'Solicitudes', ruta: '/inventory/solicitudes', icono: '📋', orden: 5, seccion: 'Solicitudes', descripcion: 'Solicitudes de inventario' },
-  { nombre: 'Reporte Movimientos', ruta: '/inventory/reportes/movimientos', icono: '📊', orden: 6, seccion: 'Reportes', descripcion: 'Reporte de movimientos' },
-  { nombre: 'Reporte Ingresos', ruta: '/inventory/reportes/ingresos', icono: '📥', orden: 7, seccion: 'Reportes', descripcion: 'Reporte de ingresos' },
-  { nombre: 'Reporte Salidas', ruta: '/inventory/reportes/salidas', icono: '📤', orden: 8, seccion: 'Reportes', descripcion: 'Reporte de salidas' }
+  { nombre: 'Anulaciones', ruta: '/inventory/anulaciones', icono: '🚫', orden: 6, seccion: 'Solicitudes', descripcion: 'Solicitudes de anulacion de ingresos' },
+  { nombre: 'Reporte Movimientos', ruta: '/inventory/reportes/movimientos', icono: '📊', orden: 7, seccion: 'Reportes', descripcion: 'Reporte de movimientos' },
+  { nombre: 'Reporte Ingresos', ruta: '/inventory/reportes/ingresos', icono: '📥', orden: 8, seccion: 'Reportes', descripcion: 'Reporte de ingresos' },
+  { nombre: 'Reporte Salidas', ruta: '/inventory/reportes/salidas', icono: '📤', orden: 9, seccion: 'Reportes', descripcion: 'Reporte de salidas' }
 ];
 
 async function run() {

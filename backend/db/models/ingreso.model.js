@@ -69,6 +69,12 @@ const IngresoTrSchema={
     type:DataTypes.INTEGER,
     field:'user_id'
   },
+  clienteId:{
+    allowNull:true,
+    type:DataTypes.INTEGER,
+    field:'cliente_id',
+    references:{ model:'cliente_tr', key:'id' }
+  },
   createdAt:{
     allowNull:false,
     type:DataTypes.DATE,
@@ -87,6 +93,7 @@ class IngresoTr extends Model{
   static associate(models){
     this.belongsTo(models.CompanyTr, { foreignKey: 'companyId', as: 'company' })
     this.belongsTo(models.UserTr, { foreignKey: 'userId', as: 'user' })
+    this.belongsTo(models.ClienteTr, { foreignKey: 'clienteId', as: 'cliente' })
   }
 
   static config(sequelize){

@@ -9,16 +9,19 @@ class AnulacionService {
     ];
   }
 
-  async find() {
+  async find(companyId) {
+    const where = companyId ? { companyId } : {};
     const rows = await models.AnulacionTr.findAll({
+      where,
       include: this.includeOptions(),
       order: [['id', 'DESC']]
     });
     return rows.map(r => r.toJSON());
   }
 
-  async findOne(id) {
-    const row = await models.AnulacionTr.findByPk(id, { include: this.includeOptions() });
+  async findOne(id, companyId) {
+    const where = companyId ? { id, companyId } : { id };
+    const row = await models.AnulacionTr.findOne({ where, include: this.includeOptions() });
     if (!row) {
       throw boom.notFound('Solicitud no encontrada');
     }
@@ -37,6 +40,7 @@ class AnulacionService {
     if (ingreso.status === 'anulado') {
       throw boom.conflict('El ingreso ya esta anulado');
     }
+    const companyId = data.companyId || ingreso.companyId || null;
     const pending = await models.AnulacionTr.findOne({
       where: { ingresoId, estado: 'pendiente' }
     });
@@ -47,22 +51,25 @@ class AnulacionService {
       ingresoId,
       motivo: data.motivo || null,
       solicitadoPor: data.solicitadoPor ?? data.solicitado_por ?? null,
+      companyId,
       estado: 'pendiente'
     });
     return await this.findOne(created.id);
   }
 
-  async update(id, changes) {
-    const row = await models.AnulacionTr.findByPk(id);
+  async update(id, changes, companyId) {
+    const where = companyId ? { id, companyId } : { id };
+    const row = await models.AnulacionTr.findOne({ where });
     if (!row) {
       throw boom.notFound('Solicitud no encontrada');
     }
     await row.update(changes);
-    return await this.findOne(id);
+    return await this.findOne(id, companyId);
   }
 
-  async approve(id) {
-    const row = await models.AnulacionTr.findByPk(id);
+  async approve(id, companyId) {
+    const where = companyId ? { id, companyId } : { id };
+    const row = await models.AnulacionTr.findOne({ where });
     if (!row) {
       throw boom.notFound('Solicitud no encontrada');
     }
@@ -70,16 +77,16 @@ class AnulacionService {
       throw boom.conflict('La solicitud ya fue procesada');
     }
     await row.update({ estado: 'aprobada' });
-    // La aprobacion del master aplica la anulacion aunque el ingreso este completado
     const ingreso = await models.IngresoTr.findByPk(row.ingresoId);
     if (ingreso && ingreso.status !== 'anulado') {
       await ingreso.update({ status: 'anulado', numeroFactura: null });
     }
-    return await this.findOne(id);
+    return await this.findOne(id, companyId);
   }
 
-  async reject(id) {
-    const row = await models.AnulacionTr.findByPk(id);
+  async reject(id, companyId) {
+    const where = companyId ? { id, companyId } : { id };
+    const row = await models.AnulacionTr.findOne({ where });
     if (!row) {
       throw boom.notFound('Solicitud no encontrada');
     }
@@ -87,11 +94,12 @@ class AnulacionService {
       throw boom.conflict('La solicitud ya fue procesada');
     }
     await row.update({ estado: 'rechazada' });
-    return await this.findOne(id);
+    return await this.findOne(id, companyId);
   }
 
-  async delete(id) {
-    const row = await models.AnulacionTr.findByPk(id);
+  async delete(id, companyId) {
+    const where = companyId ? { id, companyId } : { id };
+    const row = await models.AnulacionTr.findOne({ where });
     if (!row) {
       throw boom.notFound('Solicitud no encontrada');
     }

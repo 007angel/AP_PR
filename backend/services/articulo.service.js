@@ -26,13 +26,15 @@ class ArticuloService {
     return articulos;
   }
 
-  async findOne(id) {
-    const articulo = await sequelize.models.ArticuloTr.findByPk(id, { raw: true });
+  async findOne(id, companyId) {
+    const where = companyId ? { id, companyId } : { id };
+    const articulo = await sequelize.models.ArticuloTr.findOne({ where, raw: true });
     return articulo;
   }
 
-  async update(id, changes) {
-    const articulo = await sequelize.models.ArticuloTr.findByPk(id);
+  async update(id, changes, companyId) {
+    const where = companyId ? { id, companyId } : { id };
+    const articulo = await sequelize.models.ArticuloTr.findOne({ where });
     if (!articulo) return null;
     if (changes.codigo && changes.codigo !== articulo.codigo) {
       const existing = await sequelize.models.ArticuloTr.findOne({
@@ -43,11 +45,12 @@ class ArticuloService {
       }
     }
     await articulo.update(changes);
-    return await this.findOne(id);
+    return await this.findOne(id, companyId);
   }
 
-  async delete(id) {
-    const articulo = await sequelize.models.ArticuloTr.findByPk(id);
+  async delete(id, companyId) {
+    const where = companyId ? { id, companyId } : { id };
+    const articulo = await sequelize.models.ArticuloTr.findOne({ where });
     if (!articulo) return null;
     await articulo.destroy();
     return { id };

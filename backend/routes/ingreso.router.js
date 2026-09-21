@@ -9,10 +9,8 @@ const service = new ingresoService();
 router.get('/',
 async(req, res, next)=>{
   try{
-    const { companyId } = req.query
-    const ingresos = companyId
-      ? await service.findByCompany(parseInt(companyId))
-      : await service.find();
+    const companyId = req.query.companyId ? parseInt(req.query.companyId) : null;
+    const ingresos = await service.find(companyId);
     res.json(ingresos)
   }catch(error){
     next(error)
@@ -35,7 +33,8 @@ async(req, res, next)=>{
 router.get('/stats',
 async(req, res, next)=>{
   try{
-    const stats = await service.getStats();
+    const companyId = req.query.companyId ? parseInt(req.query.companyId) : null;
+    const stats = await service.getStats(companyId);
     res.json(stats)
   }catch(error){
     next(error)
@@ -47,7 +46,8 @@ router.get('/recent',
 async(req, res, next)=>{
   try{
     const limit = parseInt(req.query.limit) || 5;
-    const ingresos = await service.findRecent(limit);
+    const companyId = req.query.companyId ? parseInt(req.query.companyId) : null;
+    const ingresos = await service.findRecent(limit, companyId);
     res.json(ingresos)
   }catch(error){
     next(error)
@@ -71,7 +71,8 @@ router.get('/:id',validatorHandler(getIngresoSchema,'params'),
 async(req, res, next)=>{
   try{
     const{ id }= req.params;
-    const ingreso= await service.findOne(id);
+    const companyId = req.query.companyId ? parseInt(req.query.companyId) : null;
+    const ingreso= await service.findOne(id, companyId);
     if(!ingreso){
       res.status(404).json({message:'Ingreso no encontrado'})
     }else{
@@ -88,7 +89,18 @@ validatorHandler(createIngresoSchema,'body'),
 async(req, res, next)=>{
   try{
     const body = req.body;
-    const existingCorrelativo = await service.findByCorrelativo(body.correlativo);
+    const companyId = body.companyId || null;
+    const userRole = body.userRole || 'user';
+    if (userRole !== 'master' && userRole !== 'admin' && body.fechaIngreso) {
+      const fecha = new Date(body.fechaIngreso);
+      const limite = new Date();
+      limite.setDate(limite.getDate() - 15);
+      limite.setHours(0, 0, 0, 0);
+      if (fecha < limite) {
+        return res.status(400).json({message:'Solo puede registrar ingresos con fecha no mayor a 15 dias. Solicite al administrador.'});
+      }
+    }
+    const existingCorrelativo = await service.findByCorrelativo(body.correlativo, companyId);
     if(existingCorrelativo){
       return res.status(400).json({message:'El correlativo ya esta registrado'})
     }
@@ -107,7 +119,8 @@ async(req, res, next)=>{
   try{
     const { id } = req.params;
     const changes = req.body;
-    const ingreso = await service.update(id, changes);
+    const companyId = changes.companyId || req.query.companyId ? parseInt(changes.companyId || req.query.companyId) : null;
+    const ingreso = await service.update(id, changes, companyId);
     if(!ingreso){
       res.status(404).json({message:'Ingreso no encontrado'})
     }else{
@@ -124,7 +137,8 @@ router.delete('/:id',
 async(req, res, next)=>{
   try{
     const { id } = req.params;
-    const result = await service.delete(id);
+    const companyId = req.query.companyId ? parseInt(req.query.companyId) : null;
+    const result = await service.delete(id, companyId);
     if(!result){
       res.status(404).json({message:'Ingreso no encontrado'})
     }else{

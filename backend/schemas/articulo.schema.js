@@ -28,7 +28,7 @@ const updateArticuloSchema = Joi.object({
   unidad: unidad,
   precio: precio,
   foto: foto
-});
+}).options({ stripUnknown: true });
 
 const getArticuloSchema = Joi.object({
   id: id.required()

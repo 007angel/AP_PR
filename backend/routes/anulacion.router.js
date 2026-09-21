@@ -9,7 +9,8 @@ const service = new AnulacionService();
 router.get('/',
 async(req, res, next)=>{
   try{
-    const rows = await service.find();
+    const companyId = req.query.companyId ? parseInt(req.query.companyId) : null;
+    const rows = await service.find(companyId);
     res.json(rows)
   }catch(error){
     next(error)
@@ -21,7 +22,8 @@ router.get('/:id',validatorHandler(getAnulacionSchema,'params'),
 async(req, res, next)=>{
   try{
     const { id } = req.params;
-    const row = await service.findOne(id);
+    const companyId = req.query.companyId ? parseInt(req.query.companyId) : null;
+    const row = await service.findOne(id, companyId);
     res.json(row)
   }catch(error){
     next(error)
@@ -46,7 +48,8 @@ validatorHandler(getAnulacionSchema,'params'),
 async(req, res, next)=>{
   try{
     const { id } = req.params;
-    const row = await service.approve(id);
+    const companyId = req.body.companyId || req.query.companyId ? parseInt(req.body.companyId || req.query.companyId) : null;
+    const row = await service.approve(id, companyId);
     res.json(row)
   }catch(error){
     next(error)
@@ -59,7 +62,8 @@ validatorHandler(getAnulacionSchema,'params'),
 async(req, res, next)=>{
   try{
     const { id } = req.params;
-    const row = await service.reject(id);
+    const companyId = req.body.companyId || req.query.companyId ? parseInt(req.body.companyId || req.query.companyId) : null;
+    const row = await service.reject(id, companyId);
     res.json(row)
   }catch(error){
     next(error)
@@ -73,7 +77,8 @@ router.put('/:id',
 async(req, res, next)=>{
   try{
     const { id } = req.params;
-    const row = await service.update(id, req.body);
+    const companyId = req.body.companyId || req.query.companyId ? parseInt(req.body.companyId || req.query.companyId) : null;
+    const row = await service.update(id, req.body, companyId);
     res.json(row)
   }catch(error){
     next(error)
@@ -86,7 +91,8 @@ router.delete('/:id',
 async(req, res, next)=>{
   try{
     const { id } = req.params;
-    const result = await service.delete(id);
+    const companyId = req.query.companyId ? parseInt(req.query.companyId) : null;
+    const result = await service.delete(id, companyId);
     res.json({message:'Solicitud eliminada', id: result.id})
   }catch(error){
     next(error)

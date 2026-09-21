@@ -17,8 +17,10 @@ export class SolicitudService {
     return this.http.get<Solicitud[]>(url);
   }
 
-  findOne(id: number): Observable<Solicitud> {
-    return this.http.get<Solicitud>(`${this.apiUrl}/${id}`);
+  findOne(id: number, companyId?: number | null): Observable<Solicitud> {
+    const params: any = {};
+    if (companyId) params.companyId = companyId;
+    return this.http.get<Solicitud>(`${this.apiUrl}/${id}`, { params });
   }
 
   create(data: CreateSolicitud): Observable<{ solicitud: Solicitud; detalles: any[] }> {
@@ -29,12 +31,14 @@ export class SolicitudService {
     return this.http.put<Solicitud>(`${this.apiUrl}/${id}`, changes);
   }
 
-  updateEstado(id: number, estado: string): Observable<Solicitud> {
-    return this.http.patch<Solicitud>(`${this.apiUrl}/${id}/estado`, { estado });
+  updateEstado(id: number, estado: string, companyId?: number | null): Observable<Solicitud> {
+    return this.http.patch<Solicitud>(`${this.apiUrl}/${id}/estado`, { estado, companyId });
   }
 
-  delete(id: number): Observable<any> {
-    return this.http.delete<any>(`${this.apiUrl}/${id}`);
+  delete(id: number, companyId?: number | null): Observable<any> {
+    const params: any = {};
+    if (companyId) params.companyId = companyId;
+    return this.http.delete<any>(`${this.apiUrl}/${id}`, { params });
   }
 
   getAvailableArticles(companyId?: number | null): Observable<AvailableArticle[]> {
@@ -49,11 +53,13 @@ export class SolicitudService {
     return this.http.get<any>(url);
   }
 
-  findByIngreso(ingresoId: number): Observable<Solicitud[]> {
-    return this.http.get<Solicitud[]>(`${this.apiUrl}/by-ingreso/${ingresoId}`);
+  findByIngreso(ingresoId: number, companyId?: number | null): Observable<Solicitud[]> {
+    const params: any = {};
+    if (companyId) params.companyId = companyId;
+    return this.http.get<Solicitud[]>(`${this.apiUrl}/by-ingreso/${ingresoId}`, { params });
   }
 
-  updateDetalle(detalleId: number, cantidadEntregada: number): Observable<any> {
-    return this.http.patch<any>(`${this.apiUrl}/detalle/${detalleId}`, { cantidadEntregada });
+  updateDetalle(detalleId: number, cantidadEntregada: number, companyId?: number | null): Observable<any> {
+    return this.http.patch<any>(`${this.apiUrl}/detalle/${detalleId}`, { cantidadEntregada, companyId });
   }
 }
