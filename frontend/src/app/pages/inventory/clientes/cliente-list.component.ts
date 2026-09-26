@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
+import { HttpClient } from '@angular/common/http';
 import { ClienteService } from '../../../services/cliente.service';
 import { ArticuloService } from '../../../services/articulo.service';
 import { AuthService } from '../../../services/auth.service';
@@ -189,25 +190,25 @@ import { ConfirmService } from '../../../shared/confirm-dialog/confirm.service';
     .data-table td { padding: 14px 16px; font-size: 14px; color: var(--text-primary); border-bottom: 1px solid var(--border-primary); }
     .data-table tr:last-child td { border-bottom: none; }
     .empty-row { text-align: center; color: var(--text-tertiary); padding: 40px !important; }
-    .action-buttons { display: flex; gap: 8px; }
+    .action-buttons { display: flex; gap: 8px; flex-wrap: wrap; }
     .btn-action { padding: 6px 12px; font-size: 12px; font-weight: 500; color: var(--accent-primary); background: var(--accent-bg); border: 1px solid var(--accent-border); border-radius: var(--radius-md); cursor: pointer; transition: var(--transition); }
     .btn-action:hover { background: var(--accent-primary); color: white; }
     .btn-delete { color: var(--danger-text); background: var(--danger-bg); border-color: var(--danger-border); }
     .btn-delete:hover { background: var(--danger); color: white; }
-    .btn-articulos { color: #059669; background: #ecfdf5; border-color: #a7f3d0; }
-    .btn-articulos:hover { background: #059669; color: white; }
+    .btn-articulos { color: var(--success-text); background: var(--success-bg); border-color: var(--success-border); }
+    .btn-articulos:hover { background: var(--success-text); color: white; }
 
-    .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 1000; }
-    .modal-content { background: var(--bg-secondary); border: 1px solid var(--border-primary); border-radius: var(--radius-lg); width: 500px; max-height: 80vh; display: flex; flex-direction: column; }
-    .modal-header { display: flex; justify-content: space-between; align-items: center; padding: 20px 24px; border-bottom: 1px solid var(--border-primary); }
+    .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 1000; padding: 16px; }
+    .modal-content { background: var(--bg-secondary); border: 1px solid var(--border-primary); border-radius: var(--radius-lg); width: 100%; max-width: 500px; max-height: 80vh; display: flex; flex-direction: column; box-shadow: var(--shadow-lg); }
+    .modal-header { display: flex; justify-content: space-between; align-items: center; padding: 20px 24px; border-bottom: 1px solid var(--border-primary); flex-shrink: 0; }
     .modal-header h3 { margin: 0; font-size: 16px; font-weight: 600; color: var(--text-primary); }
     .btn-close { background: none; border: none; font-size: 24px; color: var(--text-tertiary); cursor: pointer; padding: 0; line-height: 1; }
-    .modal-body { padding: 20px 24px; overflow-y: auto; flex: 1; }
+    .modal-body { padding: 20px 24px; overflow-y: auto; flex: 1; min-height: 0; }
     .modal-hint { font-size: 13px; color: var(--text-tertiary); margin: 0 0 16px; }
-    .modal-footer { display: flex; justify-content: flex-end; gap: 10px; padding: 16px 24px; border-top: 1px solid var(--border-primary); }
+    .modal-footer { display: flex; justify-content: flex-end; gap: 10px; padding: 16px 24px; border-top: 1px solid var(--border-primary); flex-shrink: 0; }
     .articulos-search { margin-bottom: 12px; }
     .articulos-search input { width: 100%; padding: 10px 14px; font-size: 14px; border: 1px solid var(--border-primary); border-radius: var(--radius-md); background: var(--bg-primary); color: var(--text-primary); outline: none; box-sizing: border-box; }
-    .articulos-list { display: flex; flex-direction: column; gap: 4px; }
+    .articulos-list { display: flex; flex-direction: column; gap: 4px; max-height: 50vh; overflow-y: auto; }
     .articulo-check { display: flex; align-items: center; gap: 10px; padding: 8px 12px; border-radius: var(--radius-md); cursor: pointer; transition: var(--transition); }
     .articulo-check:hover { background: var(--bg-tertiary); }
     .check-info { display: flex; flex-direction: column; gap: 2px; }
@@ -215,7 +216,11 @@ import { ConfirmService } from '../../../shared/confirm-dialog/confirm.service';
     .check-meta { font-size: 12px; color: var(--text-tertiary); }
     .empty-list { text-align: center; color: var(--text-tertiary); padding: 24px; }
 
-    @media (max-width: 768px) { .form-grid { grid-template-columns: 1fr; } }
+    @media (max-width: 768px) {
+      .form-grid { grid-template-columns: 1fr; }
+      .modal-overlay { padding: 12px; align-items: flex-end; }
+      .modal-content { max-height: 90vh; border-radius: var(--radius-lg) var(--radius-lg) 0 0; }
+    }
   `]
 })
 export class ClienteListComponent implements OnInit {
@@ -241,7 +246,8 @@ export class ClienteListComponent implements OnInit {
     private clienteService: ClienteService,
     private articuloService: ArticuloService,
     private authService: AuthService,
-    private confirmService: ConfirmService
+    private confirmService: ConfirmService,
+    private http: HttpClient
   ) {}
 
   ngOnInit() {
@@ -380,19 +386,20 @@ export class ClienteListComponent implements OnInit {
     if (!this.articuloCliente) return;
     this.isSavingArticulos = true;
     const payload = { articuloIds: Array.from(this.selectedArticuloIds) };
-    fetch(`/api/v1/cliente/${this.articuloCliente.id}/articulos`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
-    }).then(res => {
-      this.isSavingArticulos = false;
-      this.showArticulosModal = false;
-      this.successMessage = 'Artículos actualizados para el cliente';
-      setTimeout(() => this.successMessage = '', 3000);
-    }).catch(() => {
-      this.isSavingArticulos = false;
-      this.errorMessage = 'Error al guardar artículos';
-      setTimeout(() => this.errorMessage = '', 5000);
+    const companyId = this.authService.getCompanyId();
+    const url = `/api/v1/cliente/${this.articuloCliente.id}/articulos${companyId ? `?companyId=${companyId}` : ''}`;
+    this.http.put(url, payload).subscribe({
+      next: () => {
+        this.isSavingArticulos = false;
+        this.showArticulosModal = false;
+        this.successMessage = 'Artículos actualizados para el cliente';
+        setTimeout(() => this.successMessage = '', 3000);
+      },
+      error: () => {
+        this.isSavingArticulos = false;
+        this.errorMessage = 'Error al guardar artículos';
+        setTimeout(() => this.errorMessage = '', 5000);
+      }
     });
   }
 

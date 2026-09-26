@@ -172,9 +172,9 @@ import { ConfirmService } from '../../../shared/confirm-dialog/confirm.service';
     /* Form Card */
     .form-card { background: var(--bg-secondary); border: 1px solid var(--border-primary); border-radius: var(--radius-lg); padding: 24px; margin-bottom: 24px; }
     .form-card h3 { margin: 0 0 20px; font-size: 16px; font-weight: 600; color: var(--text-primary); }
-    .form-layout { display: flex; gap: 24px; }
-    .form-fields { flex: 1; }
-    .form-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+    .form-layout { display: flex; gap: 24px; flex-wrap: wrap; }
+    .form-fields { flex: 1; min-width: 280px; }
+    .form-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
     .full-width { grid-column: 1 / -1; }
     .form-group { display: flex; flex-direction: column; }
     .form-group label { font-size: 13px; font-weight: 600; color: var(--text-secondary); margin-bottom: 6px; }
@@ -185,8 +185,8 @@ import { ConfirmService } from '../../../shared/confirm-dialog/confirm.service';
     .form-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--border-primary); }
 
     /* Foto Section */
-    .foto-section { display: flex; flex-direction: column; align-items: center; gap: 10px; }
-    .foto-preview { width: 160px; height: 160px; border: 2px dashed var(--border-primary); border-radius: var(--radius-lg); overflow: hidden; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: var(--transition); }
+    .foto-section { display: flex; flex-direction: column; align-items: center; gap: 10px; width: 160px; flex-shrink: 0; }
+    .foto-preview { width: 100%; aspect-ratio: 1; min-width: 120px; max-width: 180px; border: 2px dashed var(--border-primary); border-radius: var(--radius-lg); overflow: hidden; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: var(--transition); }
     .foto-preview:hover { border-color: var(--accent-primary); }
     .foto-img { width: 100%; height: 100%; object-fit: cover; }
     .foto-placeholder { display: flex; flex-direction: column; align-items: center; gap: 8px; color: var(--text-muted); }
@@ -206,7 +206,7 @@ import { ConfirmService } from '../../../shared/confirm-dialog/confirm.service';
     .articulos-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
     .articulo-card { background: var(--bg-secondary); border: 1px solid var(--border-primary); border-radius: var(--radius-lg); overflow: hidden; transition: var(--transition); }
     .articulo-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
-    .articulo-foto { width: 100%; height: 180px; overflow: hidden; background: var(--bg-tertiary); }
+    .articulo-foto { width: 100%; aspect-ratio: 4/3; min-height: 160px; max-height: 200px; overflow: hidden; background: var(--bg-tertiary); }
     .articulo-foto img { width: 100%; height: 100%; object-fit: cover; }
     .no-foto { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: var(--text-muted); }
     .articulo-info { padding: 16px; }
@@ -230,6 +230,13 @@ import { ConfirmService } from '../../../shared/confirm-dialog/confirm.service';
       .form-layout { flex-direction: column; }
       .form-grid { grid-template-columns: 1fr; }
       .articulos-grid { grid-template-columns: 1fr; }
+      .foto-section { width: 100%; flex-direction: row; justify-content: flex-start; }
+      .foto-preview { max-width: 120px; }
+    }
+
+    @media (min-width: 769px) and (max-width: 1024px) {
+      .form-grid { grid-template-columns: 1fr 1fr; }
+      .full-width { grid-column: 1 / -1; }
     }
   `]
 })

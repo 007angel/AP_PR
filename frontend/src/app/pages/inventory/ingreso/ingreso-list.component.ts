@@ -28,6 +28,13 @@ import { IngresoDetalle } from '../../../models/ingreso-detalle.model';
           <a routerLink="/inventory/dashboard" class="btn-back">
             ← Dashboard
           </a>
+          <button class="btn-primary" routerLink="/inventory/ingreso/new">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="12" y1="5" x2="12" y2="19"></line>
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+            </svg>
+            Nuevo Ingreso
+          </button>
           <button class="btn-excel" (click)="excelUpload.open()">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
@@ -36,13 +43,6 @@ import { IngresoDetalle } from '../../../models/ingreso-detalle.model';
               <polyline points="9 15 12 12 15 15"></polyline>
             </svg>
             Subir Excel
-          </button>
-          <button class="btn-primary" routerLink="/inventory/ingreso/new">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <line x1="12" y1="5" x2="12" y2="19"></line>
-              <line x1="5" y1="12" x2="19" y2="12"></line>
-            </svg>
-            Nuevo Ingreso
           </button>
         </div>
       </div>
@@ -198,14 +198,14 @@ import { IngresoDetalle } from '../../../models/ingreso-detalle.model';
     .btn-excel { display: inline-flex; align-items: center; gap: 8px; padding: 12px 24px; font-size: 14px; font-weight: 600; color: #059669; background: #ecfdf5; border: 1px solid #a7f3d0; border-radius: var(--radius-md); cursor: pointer; transition: var(--transition); }
     .btn-excel:hover { background: #059669; color: white; border-color: #059669; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(5, 150, 105, 0.3); }
 
-    .col-toggle { width: 40px; text-align: center; }
+    .col-toggle { width: 48px; text-align: center; }
     .btn-toggle { background: none; border: 1px solid var(--border-primary); border-radius: var(--radius-sm); width: 28px; height: 28px; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; transition: var(--transition); color: var(--text-tertiary); }
     .btn-toggle:hover { background: var(--bg-tertiary); color: var(--text-primary); border-color: var(--accent-primary); }
     .btn-toggle.expanded { background: var(--accent-bg); color: var(--accent-primary); border-color: var(--accent-border); transform: rotate(90deg); }
-    .row-expanded td { background: var(--bg-tertiary); }
+    .row-expanded > td { background: var(--bg-tertiary); }
 
-    .detail-row td { padding: 0 !important; border-bottom: 1px solid var(--border-primary); }
-    .detail-container { padding: 16px 24px 16px 56px; background: var(--bg-primary); border-top: 1px dashed var(--border-primary); }
+    .detail-row td { padding: 0; border-bottom: 1px solid var(--border-primary); }
+    .detail-container { padding: 16px 24px 16px calc(var(--col-toggle-width, 48px) + 8px); background: var(--bg-primary); border-top: 1px dashed var(--border-primary); }
     .detail-loading, .detail-empty { color: var(--text-tertiary); font-size: 13px; padding: 12px 0; }
     .detail-table { width: 100%; border-collapse: collapse; }
     .detail-table th { padding: 8px 12px; font-size: 11px; font-weight: 600; color: var(--text-tertiary); text-transform: uppercase; letter-spacing: 0.5px; text-align: left; background: var(--bg-tertiary); border-radius: var(--radius-sm); }

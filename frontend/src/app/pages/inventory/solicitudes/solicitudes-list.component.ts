@@ -133,12 +133,12 @@ import { Solicitud } from '../../../models/solicitud.model';
     .btn-primary { display: inline-flex; align-items: center; gap: 8px; padding: 12px 24px; font-size: 14px; font-weight: 600; color: white; background: var(--accent-primary); border: none; border-radius: var(--radius-md); cursor: pointer; transition: var(--transition); text-decoration: none; }
     .btn-primary:hover { background: var(--accent-hover); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3); }
 
-    .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 28px; }
+    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 28px; }
     .stat-card { display: flex; align-items: center; gap: 14px; padding: 18px 20px; background: var(--bg-secondary); border: 1px solid var(--border-primary); border-radius: var(--radius-lg); }
     .stat-icon { width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; }
     .stat-icon.pendiente { background: var(--warning-bg); color: var(--warning-text); }
     .stat-icon.aprobado { background: var(--success-bg); color: var(--success-text); }
-    .stat-icon.completado { background: #ede9fe; color: #7c3aed; }
+    .stat-icon.completado { background: var(--info-bg); color: var(--info-text); }
     .stat-info { display: flex; flex-direction: column; }
     .stat-value { font-size: 22px; font-weight: 700; color: var(--text-primary); }
     .stat-label { font-size: 12px; color: var(--text-tertiary); }
@@ -151,21 +151,21 @@ import { Solicitud } from '../../../models/solicitud.model';
     .data-table th { padding: 16px; text-align: left; font-size: 12px; font-weight: 600; color: var(--text-tertiary); text-transform: uppercase; letter-spacing: 0.5px; background: var(--bg-tertiary); border-bottom: 1px solid var(--border-primary); }
     .data-table td { padding: 16px; font-size: 14px; color: var(--text-primary); border-bottom: 1px solid var(--border-primary); }
     .data-table tr:last-child td { border-bottom: none; }
-    .empty-row { text-align: center; color: var(--text-tertiary); padding: 40px !important; }
+    .empty-row { text-align: center; color: var(--text-tertiary); padding: 40px; }
 
     .status-badge { padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 500; }
     .status-pendiente { background: var(--warning-bg); color: var(--warning-text); }
     .status-aprobado { background: var(--success-bg); color: var(--success-text); }
     .status-rechazado { background: var(--danger-bg); color: var(--danger-text); }
-    .status-completado { background: #ede9fe; color: #7c3aed; }
+    .status-completado { background: var(--info-bg); color: var(--info-text); }
 
-    .action-buttons { display: flex; gap: 8px; }
+    .action-buttons { display: flex; gap: 8px; flex-wrap: wrap; }
     .btn-action { padding: 6px 12px; font-size: 12px; color: var(--accent-primary); background: var(--accent-bg); border: 1px solid var(--accent-border); border-radius: var(--radius-md); text-decoration: none; transition: var(--transition); cursor: pointer; font-weight: 500; }
     .btn-action:hover { background: var(--accent-primary); color: white; }
-    .btn-success { color: #059669; background: #ecfdf5; border-color: #a7f3d0; }
-    .btn-success:hover { background: #059669; color: white; }
-    .btn-danger { color: #dc2626; background: #fef2f2; border-color: #fecaca; }
-    .btn-danger:hover { background: #dc2626; color: white; }
+    .btn-success { color: var(--success-text); background: var(--success-bg); border-color: var(--success-border); }
+    .btn-success:hover { background: var(--success-text); color: white; }
+    .btn-danger { color: var(--danger-text); background: var(--danger-bg); border-color: var(--danger-border); }
+    .btn-danger:hover { background: var(--danger); color: white; }
   `]
 })
 export class SolicitudesListComponent implements OnInit {
